@@ -121,3 +121,76 @@ td { padding: 8px; color: var(--text-light); }
 .chat-header { color: var(--cyan); font-weight: bold; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
 .chat-msg { background: #162235; border-left: 2px solid var(--cyan); padding: 10px; border-radius: 4px; color: #fff; line-height: 1.5; }
 
+/* --- สไตล์ทั่วไปสำหรับคอนเทนเนอร์แผนที่ (จาก CSS เดิม) --- */
+.map-container {
+    background-color: #0d1522; /* สีพื้นหลังแผงเดิม */
+    border: 1px solid #1e2d4a; /* ขอบแผงเดิม */
+    border-radius: 6px;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+.card-title {
+    color: #a0b6d1; /* สีข้อความเดิม */
+    font-family: 'Consolas', monospace;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* --- คอนเทนเนอร์แผนที่จริงใหม่ --- */
+.real-map {
+    position: relative;
+    height: calc(100% - 30px); /* ปรับความสูงตามความจำเป็น */
+    background-color: #050a10; /* สีพื้นหลังแผนที่เข้ม */
+    /* *** สำคัญ: ต้องระบุที่อยู่ของไฟล์แผนที่จริง *** */
+    background-image: url('world-map.svg'); /* ไฟล์แผนที่โลกจริง */
+    background-size: contain; /* หรือ cover ขึ้นอยู่กับภาพแผนที่ */
+    background-position: center;
+    background-repeat: no-repeat;
+    
+    /* (ถ้าต้องการ): คุณสามารถรวมพื้นหลังจุดเดิมกับแผนที่ใหม่ได้ */
+    /* background-image: 
+        url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEcZcwAAEnQAABJ0Ad5mH3gAAAAkSURBVBhXY/hPyMAAQ4w5A8MMKMcBGBjAgDEDwgwMM4D4EGBgYODfAAAwAAMwAAMw/mAAAAAElFTkSuQmCC'), 
+        url('world-map.svg'); */
+}
+
+/* --- สไตล์สำหรับจุด (Nodes) ทั่วไป --- */
+.map-node {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    text-align: center;
+    line-height: 24px; /* วางป้ายกำกับด้านล่าง */
+    color: #a0b6d1;
+    cursor: default; /* ไม่ใช่ปุ่ม */
+}
+
+/* --- สไตล์สีและการเรืองแสง (ตามรูปภาพ) --- */
+.source-node {
+    background-color: #ff9800; /* สีส้ม */
+    box-shadow: 0 0 10px #ff9800, 0 0 20px #ff9800; /* เรืองแสง */
+}
+
+.target-node {
+    background-color: #00bcd4; /* สีฟ้า */
+    box-shadow: 0 0 10px #00bcd4, 0 0 20px #00bcd4; /* เรืองแสง */
+}
+
+/* --- ตำแหน่งเปอร์เซ็นต์ที่ย้ายมาจาก HTML (ตามภาพตัวอย่าง) --- */
+.node-us {
+    top: 30%;
+    left: 20%;
+}
+
+.node-ru {
+    top: 20%;
+    left: 50%;
+}
+
+.node-in {
+    top: 50%;
+    left: 60%;
+}
