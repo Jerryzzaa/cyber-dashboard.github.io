@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analyst</title>
+    <!-- เชื่อมไฟล์ CSS -->
+    <link rel="stylesheet" href="chatbot.css">
+</head>
+<body>
+
+    <div class="ai-sidebar">
+        <!-- Header แบบ Sendbird -->
+        <div class="ai-header">
+            <div class="header-profile">
+                <div class="header-avatar"></div>
+                <div class="header-info">
+                    <div class="bot-name">AI Analyst</div>
+                    <div class="bot-status"><span class="status-dot"></span> Online</div>
+                </div>
+            </div>
+            <span class="close-icon" title="ปิดแชท">✕</span>
+        </div>
+        
+        <!-- พื้นที่แสดงประวัติการแชท -->
+        <div class="chat-history" id="chatHistory">
+            <!-- ข้อความต้อนรับจากบอท (ข้อความแรก) -->
+            <div class="message-wrapper bot">
+                <div class="message-avatar"></div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        พร้อมใช้งาน — พิมพ์ help เพื่อดูคำสั่ง หรือถามเกี่ยวกับ threat ที่กำลังเกิดขึ้นได้เลยครับ
+                    </div>
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- แถบด้านล่างสุด -->
+        <div class="chat-bottom">
+            <!-- ปุ่มตัวเลือกคำถาม -->
+            <div class="suggestion-tags">
+                <button class="tag-btn">critical</button>
+                <button class="tag-btn">ddos</button>
+                <button class="tag-btn">top sources</button>
+                <button class="tag-btn">status</button>
+            </div>
+            
+            <!-- ช่องพิมพ์สไตล์ Sendbird (รวมเป็นแคปซูลเดียว) -->
+            <div class="input-container">
+                <input type="text" id="aiInput" placeholder="Type your message..." autocomplete="off">
+                <button id="sendBtn" class="send-btn">
+                    <!-- ไอคอนปุ่มส่ง (จรวดกระดาษ) -->
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- เรียกใช้ไฟล์ JavaScript -->
+    <script src="chatbot.js"></script>
+    <script>
+        // เริ่มการทำงานของบอททันทีที่โหลดหน้าเว็บเสร็จ
+        document.addEventListener("DOMContentLoaded", () => {
+            initChatbot(); 
+        });
+    </script>
+</body>
+</html>
