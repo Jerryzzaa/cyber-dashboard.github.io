@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyberwatch SOC</title>
     <link rel="stylesheet" href="dash.css">
+    <!-- นำเข้า Chart.js สำหรับกราฟคอลัมน์ขวา -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="dashboard">
@@ -23,7 +25,7 @@
             </div>
         </header>
 
-        <!-- Left Sidebar -->
+        <!-- Left Sidebar (สถิติต่างๆ - โครงสร้างเดิม) -->
         <aside class="sidebar-left">
             <div class="stat-card panel">
                 <div class="card-title">ATTACKS TODAY</div>
@@ -64,9 +66,24 @@
                 <div class="map-container panel">
                     <div class="card-title">GLOBAL THREAT MAP</div>
                     <div class="mock-map">
-                        <div class="map-node target" style="top: 50%; left: 60%;">IN</div>
-                        <div class="map-node source" style="top: 30%; left: 20%;">US</div>
-                        <div class="map-node source" style="top: 20%; left: 50%;">RU</div>
+                        <!-- SVG เส้นเชื่อมโยงการโจมตีไปที่ Target -->
+                        <svg class="map-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
+                            <line x1="10" y1="50" x2="60" y2="60" stroke="#ff9800" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- US to IN -->
+                            <line x1="30" y1="20" x2="60" y2="60" stroke="#ff9800" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- NL/DE to IN -->
+                            <line x1="45" y1="35" x2="60" y2="60" stroke="#00bcd4" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- TR to IN -->
+                            <line x1="65" y1="25" x2="60" y2="60" stroke="#ff9800" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- RU to IN -->
+                            <line x1="85" y1="20" x2="60" y2="60" stroke="#ff4c4c" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- CN to IN -->
+                            <line x1="40" y1="75" x2="60" y2="60" stroke="#ff9800" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- SG to IN -->
+                        </svg>
+
+                        <!-- จุด Nodes -->
+                        <div class="map-node target" style="top: 60%; left: 60%;">IN TARGET</div>
+                        <div class="map-node source" style="top: 50%; left: 10%;">US</div>
+                        <div class="map-node source" style="top: 20%; left: 30%;">NL</div>
+                        <div class="map-node blue-node" style="top: 35%; left: 45%;">TR</div>
+                        <div class="map-node source" style="top: 25%; left: 65%;">RU</div>
+                        <div class="map-node red-node" style="top: 20%; left: 85%;">CN</div>
+                        <div class="map-node source" style="top: 75%; left: 40%;">SG</div>
                     </div>
                 </div>
                 <div class="donut-container panel">
@@ -86,10 +103,10 @@
                 </div>
             </div>
 
+            <!-- Volume Chart -->
             <div class="bar-chart-container panel">
                 <div class="card-title">ATTACK VOLUME - LAST 24H</div>
                 <div class="chart-bars">
-                    <!-- จำลองกราฟแท่ง -->
                     <div class="bar cyan" style="height: 10%"><span>00</span></div>
                     <div class="bar cyan" style="height: 5%"></div>
                     <div class="bar cyan" style="height: 15%"></div>
@@ -110,6 +127,7 @@
                 </div>
             </div>
 
+            <!-- Table -->
             <div class="table-container panel">
                 <div class="table-filters">
                     <button class="active">ALL</button>
@@ -121,64 +139,70 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>TIME</th>
-                            <th>SRC IP</th>
-                            <th>CC</th>
-                            <th>DST IP</th>
-                            <th>TYPE</th>
-                            <th>SEV</th>
-                            <th>PORT</th>
-                            <th>STATUS</th>
-                            <th>PKTS</th>
+                            <th>TIME</th><th>SRC IP</th><th>CC</th><th>DST IP</th>
+                            <th>TYPE</th><th>SEV</th><th>PORT</th><th>STATUS</th><th>PKTS</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>14:32:01</td>
-                            <td class="blue-text">185.220.101.47</td>
-                            <td>RU</td>
-                            <td>10.0.1.15</td>
-                            <td>SQL Injection</td>
-                            <td><span class="badge critical">CRITICAL</span></td>
-                            <td>3306</td>
-                            <td class="green-text">BLOCKED</td>
-                            <td>2,841</td>
+                            <td>14:32:01</td><td class="blue-text">185.220.101.47</td><td>RU</td><td>10.0.1.15</td>
+                            <td>SQL Injection</td><td><span class="badge critical">CRITICAL</span></td><td>3306</td><td class="green-text">BLOCKED</td><td>2,841</td>
                         </tr>
                         <tr>
-                            <td>14:31:58</td>
-                            <td class="blue-text">103.75.190.22</td>
-                            <td>CN</td>
-                            <td>10.0.2.88</td>
-                            <td>Brute Force SSH</td>
-                            <td><span class="badge high">HIGH</span></td>
-                            <td>22</td>
-                            <td class="yellow-text">DETECTED</td>
-                            <td>18,432</td>
+                            <td>14:31:58</td><td class="blue-text">103.75.190.22</td><td>CN</td><td>10.0.2.88</td>
+                            <td>Brute Force SSH</td><td><span class="badge high">HIGH</span></td><td>22</td><td class="yellow-text">DETECTED</td><td>18,432</td>
                         </tr>
                         <tr>
-                            <td>14:31:44</td>
-                            <td class="blue-text">45.142.212.100</td>
-                            <td>NL</td>
-                            <td>10.0.0.1</td>
-                            <td>DDoS UDP Flood</td>
-                            <td><span class="badge critical">CRITICAL</span></td>
-                            <td>53</td>
-                            <td class="blue-text">MITIGATED</td>
-                            <td>412,890</td>
+                            <td>14:31:44</td><td class="blue-text">45.142.212.100</td><td>NL</td><td>10.0.0.1</td>
+                            <td>DDoS UDP Flood</td><td><span class="badge critical">CRITICAL</span></td><td>53</td><td class="blue-text">MITIGATED</td><td>412,890</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </main>
 
-        <!-- Right Sidebar -->
-        <aside class="sidebar-right panel">
-            <div class="chat-header">
-                <span class="dot blue"></span> AI ANALYST
+        <!-- Right Sidebar (เพิ่มกราฟ และแชทบอทแบบใหม่) -->
+        <aside class="sidebar-right">
+            <!-- Top Talkers -->
+            <div class="panel right-panel-card">
+                <div class="card-title">Top Talkers (Compromised Source IPs)</div>
+                <div class="chart-container">
+                    <canvas id="sourceChart"></canvas>
+                </div>
             </div>
-            <div class="chat-body">
-                <div class="chat-msg">
-                    <strong>CyberWatch AI พร้อมใช้งาน</strong> — พิมพ์ help เพื่อดูคำสั่ง หรือถามเกี่ยวกับ threat ที่กำลังเกิดขึ้น
+
+            <!-- Exfiltration Channels -->
+            <div class="panel right-panel-card">
+                <div class="card-title">Exfiltration Channels (Destination Ports)</div>
+                <div class="port-legend">
+                    <div class="port-item"><span style="background: #ff9800;"></span> Port 53</div>
+                    <div class="port-item"><span style="background: #00bcd4;"></span> Port 80</div>
+                    <div class="port-item"><span style="background: #f44336;"></span> Port 443</div>
+                    <div class="port-item"><span style="background: #00e676;"></span> Port 8080</div>
+                </div>
+            </div>
+
+            <!-- AI Analyst -->
+            <div class="panel ai-panel">
+                <div class="chat-header">
+                    <span class="dot blue"></span> AI ANALYST
+                </div>
+                <div class="chat-body">
+                    <div class="chat-msg">
+                        <strong>CyberWatch AI พร้อมใช้งาน</strong> — พิมพ์ help เพื่อดูคำสั่ง หรือถามเกี่ยวกับ threat ที่กำลังเกิดขึ้น
+                    </div>
+                </div>
+                <div class="chat-footer">
+                    <div class="chat-tags">
+                        <span class="tag">critical</span>
+                        <span class="tag">ddos</span>
+                        <span class="tag">top sources</span>
+                        <span class="tag">status</span>
+                    </div>
+                    <div class="chat-input-wrapper">
+                        <input type="text" placeholder="Ask about threats...">
+                        <button class="send-btn">↵</button>
+                    </div>
                 </div>
             </div>
         </aside>

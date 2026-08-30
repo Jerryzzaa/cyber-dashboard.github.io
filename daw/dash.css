@@ -17,13 +17,15 @@ body {
     padding: 0;
     background-color: var(--bg-main);
     color: var(--text-main);
-    font-family: 'Consolas', 'Courier New', monospace;
+    font-family: 'Segoe UI', 'Consolas', monospace;
     font-size: 12px;
+    height: 100vh;
+    overflow: hidden; /* ไม่ให้ Scroll */
 }
 
 .dashboard {
     display: grid;
-    grid-template-columns: 240px 1fr 280px;
+    grid-template-columns: 240px 1fr 300px; /* ขยายขวาเล็กน้อยเพื่อให้กราฟพอดี */
     grid-template-rows: 50px 1fr;
     gap: 15px;
     padding: 15px;
@@ -46,15 +48,8 @@ body {
     align-items: center;
     padding: 0 20px;
 }
-.logo-text { 
-    color: var(--cyan); 
-    font-weight: bold; 
-    font-size: 14px; 
-    margin: 0 10px; }
-.version { 
-    border: 1px solid var(--border-color); 
-    padding: 2px 6px; 
-    border-radius: 4px; }
+.logo-text { color: var(--cyan); font-weight: bold; font-size: 14px; margin: 0 10px; }
+.version { border: 1px solid var(--border-color); padding: 2px 6px; border-radius: 4px; }
 .status-bar { display: flex; gap: 20px; align-items: center; }
 .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
 .dot.red { background-color: var(--red); }
@@ -65,7 +60,7 @@ body {
 
 /* Left Sidebar */
 .sidebar-left { display: flex; flex-direction: column; gap: 10px; }
-.card-title { color: var(--text-light); text-transform: uppercase; margin-bottom: 10px; font-size: 11px; letter-spacing: 1px; }
+.card-title { color: var(--text-light); text-transform: uppercase; margin-bottom: 10px; font-size: 11px; letter-spacing: 1px; font-weight: bold; }
 .card-value { font-size: 28px; font-weight: bold; margin-bottom: 5px; }
 .red-text { color: var(--red); }
 .blue-text { color: var(--cyan); }
@@ -79,15 +74,30 @@ body {
 .main-content { display: flex; flex-direction: column; gap: 15px; overflow: hidden; }
 .top-row { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; height: 200px; }
 
-/* Map Mockup */
-.mock-map { position: relative; height: calc(100% - 20px); background: radial-gradient(circle, #1a2740 10%, transparent 10%) 0 0 / 20px 20px; }
-.map-node { position: absolute; color: var(--text-light); font-size: 10px; }
-.map-node::before { content: ''; position: absolute; width: 10px; height: 10px; border-radius: 50%; top: -12px; left: 0; }
+/* Map & Lines */
+.map-container { position: relative; }
+.mock-map { 
+    position: relative; 
+    height: calc(100% - 20px); 
+    background: radial-gradient(circle, #1a2740 10%, transparent 10%) 0 0 / 20px 20px; 
+}
+.map-lines {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;
+}
+.map-node { 
+    position: absolute; color: var(--text-light); font-size: 9px; transform: translate(-50%, -50%);
+}
+.map-node::before { 
+    content: ''; position: absolute; width: 8px; height: 8px; border-radius: 50%; top: -10px; left: 50%; transform: translateX(-50%);
+}
 .map-node.target::before { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+.map-node.target { color: var(--cyan); font-weight: bold; }
 .map-node.source::before { background: var(--orange); box-shadow: 0 0 10px var(--orange); }
+.map-node.blue-node::before { background: var(--blue); box-shadow: 0 0 10px var(--blue); }
+.map-node.red-node::before { background: var(--red); box-shadow: 0 0 10px var(--red); }
 
 /* Donut Chart Mockup */
-.donut-content { display: flex; align-items: center; gap: 20px; }
+.donut-content { display: flex; align-items: center; justify-content: space-around; height: 100%; }
 .donut-chart {
     width: 90px; height: 90px; border-radius: 50%;
     background: conic-gradient(var(--red) 0 28%, var(--orange) 28% 47%, var(--green) 47% 64%, var(--cyan) 64% 100%);
@@ -106,6 +116,7 @@ body {
 .bar span { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 10px; }
 
 /* Table */
+.table-container { flex: 1; display: flex; flex-direction: column; }
 .table-filters { display: flex; gap: 10px; margin-bottom: 15px; }
 .table-filters button { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); padding: 4px 12px; border-radius: 12px; cursor: pointer; }
 .table-filters button.active { border-color: var(--cyan); color: var(--cyan); }
@@ -116,81 +127,25 @@ td { padding: 8px; color: var(--text-light); }
 .badge.critical { color: var(--red); border-color: var(--red); }
 .badge.high { color: var(--orange); border-color: var(--orange); }
 
-/* Right Sidebar */
-.sidebar-right { display: flex; flex-direction: column; }
-.chat-header { color: var(--cyan); font-weight: bold; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-.chat-msg { background: #162235; border-left: 2px solid var(--cyan); padding: 10px; border-radius: 4px; color: #fff; line-height: 1.5; }
+/* Right Sidebar (ใหม่) */
+.sidebar-right { display: flex; flex-direction: column; gap: 10px; }
+.right-panel-card { height: 160px; display: flex; flex-direction: column; }
+.chart-container { position: relative; flex-grow: 1; height: 100%; width: 100%; }
 
-/* --- สไตล์ทั่วไปสำหรับคอนเทนเนอร์แผนที่ (จาก CSS เดิม) --- */
-.map-container {
-    background-color: #0d1522; /* สีพื้นหลังแผงเดิม */
-    border: 1px solid #1e2d4a; /* ขอบแผงเดิม */
-    border-radius: 6px;
-    padding: 15px;
-    box-sizing: border-box;
-}
+/* Port Legend (สำหรับ Exfiltration Panel) */
+.port-legend { display: flex; flex-wrap: wrap; gap: 15px; margin-top: 10px; justify-content: center; }
+.port-item { display: flex; align-items: center; color: var(--text-light); }
+.port-item span { display: inline-block; width: 30px; height: 6px; border-radius: 3px; margin-right: 8px; }
 
-.card-title {
-    color: #a0b6d1; /* สีข้อความเดิม */
-    font-family: 'Consolas', monospace;
-    font-size: 14px;
-    margin-bottom: 15px;
-}
+/* AI Analyst Panel */
+.ai-panel { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.chat-header { color: var(--cyan); font-weight: bold; margin-bottom: 15px; }
+.chat-body { flex: 1; overflow-y: auto; }
+.chat-msg { background: #162235; border-left: 2px solid var(--cyan); padding: 10px; border-radius: 4px; color: #fff; line-height: 1.5; font-size: 11px; }
 
-/* --- คอนเทนเนอร์แผนที่จริงใหม่ --- */
-.real-map {
-    position: relative;
-    height: calc(100% - 30px); /* ปรับความสูงตามความจำเป็น */
-    background-color: #050a10; /* สีพื้นหลังแผนที่เข้ม */
-    /* *** สำคัญ: ต้องระบุที่อยู่ของไฟล์แผนที่จริง *** */
-    background-image: url('world-map.svg'); /* ไฟล์แผนที่โลกจริง */
-    background-size: contain; /* หรือ cover ขึ้นอยู่กับภาพแผนที่ */
-    background-position: center;
-    background-repeat: no-repeat;
-    
-    /* (ถ้าต้องการ): คุณสามารถรวมพื้นหลังจุดเดิมกับแผนที่ใหม่ได้ */
-    /* background-image: 
-        url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEcZcwAAEnQAABJ0Ad5mH3gAAAAkSURBVBhXY/hPyMAAQ4w5A8MMKMcBGBjAgDEDwgwMM4D4EGBgYODfAAAwAAMwAAMw/mAAAAAElFTkSuQmCC'), 
-        url('world-map.svg'); */
-}
-
-/* --- สไตล์สำหรับจุด (Nodes) ทั่วไป --- */
-.map-node {
-    position: absolute;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    font-family: 'Consolas', monospace;
-    font-size: 12px;
-    text-align: center;
-    line-height: 24px; /* วางป้ายกำกับด้านล่าง */
-    color: #a0b6d1;
-    cursor: default; /* ไม่ใช่ปุ่ม */
-}
-
-/* --- สไตล์สีและการเรืองแสง (ตามรูปภาพ) --- */
-.source-node {
-    background-color: #ff9800; /* สีส้ม */
-    box-shadow: 0 0 10px #ff9800, 0 0 20px #ff9800; /* เรืองแสง */
-}
-
-.target-node {
-    background-color: #00bcd4; /* สีฟ้า */
-    box-shadow: 0 0 10px #00bcd4, 0 0 20px #00bcd4; /* เรืองแสง */
-}
-
-/* --- ตำแหน่งเปอร์เซ็นต์ที่ย้ายมาจาก HTML (ตามภาพตัวอย่าง) --- */
-.node-us {
-    top: 30%;
-    left: 20%;
-}
-
-.node-ru {
-    top: 20%;
-    left: 50%;
-}
-
-.node-in {
-    top: 50%;
-    left: 60%;
-}
+.chat-footer { margin-top: 15px; border-top: 1px solid var(--border-color); padding-top: 10px; }
+.chat-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px; }
+.chat-tags .tag { border: 1px solid var(--border-color); padding: 2px 6px; border-radius: 4px; font-size: 10px; color: var(--text-main); cursor: pointer; }
+.chat-input-wrapper { display: flex; gap: 5px; }
+.chat-input-wrapper input { flex: 1; background: #060b14; border: 1px solid var(--border-color); padding: 8px; border-radius: 4px; color: #fff; outline: none; }
+.chat-input-wrapper button { background: var(--cyan); border: none; color: #000; font-weight: bold; padding: 0 12px; border-radius: 4px; cursor: pointer; }
