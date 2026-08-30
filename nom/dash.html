@@ -45,11 +45,16 @@
                         <div class="kpi-value red-text">5</div>
                         <div class="kpi-subtext">Immediate action</div>
                     </div>
-                    <div class="card">
-                        <div class="card-title">AVG RESPONSE</div>
-                        <div class="kpi-value green-text">2.3ms</div>
-                        <div class="kpi-subtext">Last 1h P50</div>
-                    </div>
+                    <!-- Exfiltration Channels -->
+                    <div class="panel right-panel-card">
+                        <div class="card-title">Exfiltration Channels (Destination Ports)</div>
+                        <div class="port-legend">
+                    <div class="port-item"><span style="background: #ff9800;"></span> Port 53</div>
+                    <div class="port-item"><span style="background: #00bcd4;"></span> Port 80</div>
+                    <div class="port-item"><span style="background: #f44336;"></span> Port 443</div>
+                    <div class="port-item"><span style="background: #00e676;"></span> Port 8080</div>
+                </div>
+            </div>
                     <div class="card">
                     <div class="card-title" style="margin-bottom: 15px; color: #64748b;">TOP SOURCE COUNTRIES</div>
                         <div id="topCountriesList"></div>
