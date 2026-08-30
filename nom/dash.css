@@ -11,14 +11,54 @@
     --color-orange: #f97316;
 }
 
+/* =========================================
+   LAYOUT PRINCIPLES (Fixed 100vh No-Scroll)
+   ========================================= */
+
 body {
     margin: 0;
+    padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: var(--bg-main);
     color: var(--text-main);
     height: 100vh;
+    overflow: hidden; /* ล็อคไม่ให้เลื่อนทั้งหน้าเว็บ */
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.card-title, .logo, .kpi-value {
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+}
+
+/* ฟอนต์สำหรับตาราง Log และข้อมูลตัวเลข */
+.events-table, .country-stats {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.app-layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-color: #0b1121; 
+    overflow: hidden;
+}
+
+.main-dashboard {
+    flex: 1; 
+    height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+#chatbot-iframe {
+    width: 340px; 
+    min-width: 340px;
+    height: 100vh;
+    border: none;
+    border-left: 1px solid var(--border-color); 
 }
 
 /* Header Styles */
@@ -28,9 +68,12 @@ body {
     align-items: center;
     padding: 10px 20px;
     background-color: var(--bg-card);
-    border-bottom: 1px solid var(--border-color);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
     font-size: 12px;
     font-weight: bold;
+    flex-shrink: 0;
+    margin-bottom: 15px;
 }
 
 .logo {
@@ -73,17 +116,16 @@ body {
     border-radius: 4px;
 }
 
-/* Dashboard Layout */
+/* Dashboard Grid Structure */
 .dashboard-grid {
     display: flex;
     flex: 1;
-    padding: 15px;
     gap: 15px;
     overflow: hidden;
 }
 
 .left-panel {
-    flex: 0 0 250px; /* ความกว้างแผงซ้ายคงที่ */
+    flex: 0 0 250px;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -94,15 +136,16 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
-    overflow-y: auto;
+    overflow: hidden;
 }
 
-/* Card Styles */
+/* Card General Style */
 .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 6px;
     padding: 15px;
+    box-sizing: border-box;
 }
 
 .card-title {
@@ -127,99 +170,172 @@ body {
 .blue-text { color: var(--color-cyan); }
 .green-text { color: var(--color-green); }
 
-/* Center Panel Grid */
+/* Top Cards Layout */
 .top-row {
     display: flex;
     gap: 15px;
-    height: 300px;
+    height: 200px;
+    flex-shrink: 0;
 }
 
 .map-card { flex: 2; }
 .chart-card { flex: 1; display: flex; flex-direction: column;}
+
+.map-container {
+    position: relative;
+    width: 100%;
+    height: 150px !important;
+    overflow: hidden;
+}
+
 .chart-container { 
     flex: 1; 
     position: relative; 
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 200px;}
-.chart-container-bar { height: 150px; position: relative; }
+    height: 140px !important;
+}
 
-/* Table Styles */
+.volume-card {
+    height: 120px;
+    flex-shrink: 0;
+}
+
+.chart-container-bar { 
+    height: 75px !important; 
+    position: relative; 
+}
+
+/* =========================================
+   PERFECT GRID TABLE & SCROLLABLE LOGS
+   ========================================= */
+
 .table-card { 
     flex: 1; 
-    overflow-y: auto; 
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 0; /* ป้องกันไม่ให้การ์ดดันล้นจอ */
+    overflow: hidden;
 }
+
 .table-header-filters {
     display: flex;
     gap: 10px;
-    margin-bottom: 15px;
-    font-size: 12px;
+    margin-bottom: 12px;
+    font-size: 10px;
     color: var(--text-muted);
     align-items: center;
-    position: sticky;
-    top: -15px; /* ดันขึ้นไปชดเชยกับขอบของ Card */
-    background-color: var(--bg-card); /* ใส่สีพื้นหลังกันตัวหนังสือทับกัน */
-    z-index: 10;
-    padding: 15px 0 10px 0;
-    margin-top: -15px;
+    flex-shrink: 0; /* ล็อค Filter นิ่งอยู่กับที่ */
 }
+
 .table-header-filters button {
     background: transparent;
     border: 1px solid var(--border-color);
     color: var(--text-muted);
     padding: 3px 10px;
+    font-size: 10px;
     border-radius: 12px;
     cursor: pointer;
 }
+
 .table-header-filters button.active {
     border-color: var(--color-cyan);
     color: var(--color-cyan);
 }
 
+/* โครงสร้างตารางหลักใช้ CSS Grid เพื่อความตรงเป๊ะของคอลัมน์ */
 .events-table {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
     width: 100%;
-    border-collapse: collapse;
+    overflow: hidden;
+    font-family: 'Consolas', 'Fira Code', 'Courier New', monospace;
     font-size: 12px;
-    text-align: left;
+    border-collapse: collapse;
 }
+
+.events-table thead, 
+.events-table tbody {
+    display: block;
+    width: 100%;
+}
+
+/* สกอร์บาร์จะเกิดเฉพาะส่วนข้อมูล Log ด้านล่าง */
+.events-table tbody {
+    flex: 1;
+    overflow-y: auto;
+}
+
+/* กำหนดความกว้างคอลัมน์ด้วย CSS Grid */
+.events-table tr {
+    display: grid;
+    grid-template-columns: 80px 100px 40px 110px 1fr 90px 60px 100px 70px;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(30, 41, 59, 0.4);
+}
+
+.events-table thead tr {
+    border-bottom: 1px solid var(--border-color);
+    background-color: transparent; /* ลบแถบสีเทาออก */
+    padding-bottom: 8px;
+}
+
 .events-table th {
     color: var(--text-muted);
-    padding-bottom: 10px;
-    font-weight: normal;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: left;
+    letter-spacing: -0.7px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
 }
+
 .events-table td {
-    padding: 8px 0;
-    border-bottom: 1px solid #1e293b50;
-}
-.events-table td:nth-child(2) { color: var(--color-cyan); } /* IP Color */
-.sev-critical { color: var(--color-red); border: 1px solid var(--color-red); padding: 2px 6px; border-radius: 4px; font-size: 10px;}
-.sev-high { color: var(--color-orange); border: 1px solid var(--color-orange); padding: 2px 6px; border-radius: 4px; font-size: 10px;}
-/* เพิ่มสีระดับ Medium และ Low ด้านล่างนี้ */
-.sev-medium { color: var(--color-yellow); border: 1px solid var(--color-yellow); padding: 2px 6px; border-radius: 4px; font-size: 10px;}
-.sev-low { color: var(--color-cyan); border: 1px solid var(--color-cyan); padding: 2px 6px; border-radius: 4px; font-size: 10px;}
-
-/* ========================================= */
-/* Map Visualization Styles (เพิ่มใหม่ตรงนี้) */
-/* ========================================= */
-
-.map-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    white-space: nowrap;
     overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 4px 0;
+    letter-spacing: -0.7px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
 }
 
+.events-table td:nth-child(2) { color: var(--color-cyan); } /* IP Color */
+
+.events-table th:last-child, 
+.events-table td:last-child {
+    text-align: right;
+}
+
+.events-table tbody tr:hover {
+    background-color: rgba(30, 41, 59, 0.3);
+}
+
+/* Badge Severities */
+.sev-critical { 
+    color: var(--color-red); 
+    border: 1px solid var(--color-red); 
+    padding: 2px 6px; border-radius: 4px; 
+    font-size: 10px; display: inline-block; text-align: center; }
+.sev-high { 
+    color: var(--color-orange); 
+    border: 1px solid var(--color-orange); 
+    padding: 2px 6px; border-radius: 4px; 
+    font-size: 10px; display: inline-block; text-align: center; }
+.sev-medium { 
+    color: var(--color-yellow); 
+    border: 1px solid var(--color-yellow); 
+    padding: 2px 6px; border-radius: 4px; 
+    font-size: 10px; display: inline-block; text-align: center; }
+.sev-low { 
+    color: var(--color-cyan); 
+    border: 1px solid var(--color-cyan); 
+    padding: 2px 6px; border-radius: 4px; 
+    font-size: 10px; display: inline-block; text-align: center; }
+
+/* Map Visualization Styles */
 #grid-background {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
     background-image: 
         linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -229,10 +345,7 @@ body {
 
 #nodes-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0; width: 100%; height: 100%;
 }
 
 .node-group {
@@ -245,22 +358,17 @@ body {
 }
 
 .node {
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     border-radius: 50%;
-    background-color: transparent;
     position: relative;
-    transition: transform 0.2s;
 }
 
 .node::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 6px;
-    height: 6px;
+    width: 6px; height: 6px;
     border-radius: 50%;
     background-color: inherit;
 }
@@ -268,13 +376,10 @@ body {
 .pulse::after {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
+    width: 10px; height: 10px;
     border-radius: 50%;
-    box-shadow: 0 0 0 rgba(255, 255, 255, 0);
     animation: pulse 1.5s infinite;
 }
 
@@ -287,9 +392,7 @@ body {
 .country-label {
     margin-top: 5px;
     font-size: 10px;
-    font-weight: 500;
     color: var(--text-muted);
-    white-space: nowrap;
 }
 
 .target-label {
@@ -298,21 +401,14 @@ body {
     color: var(--color-cyan);
 }
 
-/* กำหนดเฉพาะสีตัวหนังสือ */
-.orange { color: var(--color-orange); }
-.blue { color: var(--color-cyan); }
-.red { color: var(--color-red); }
-.cyan { color: var(--color-cyan); }
-
-/* กำหนดสีให้เฉพาะจุดกลมๆ (วงใน) */
 .orange .node::before { background-color: var(--color-orange); }
 .blue .node::before { background-color: var(--color-cyan); }
 .red .node::before { background-color: var(--color-red); }
 .cyan .node::before { background-color: var(--color-cyan); }
+
 #attack-lines {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 0; left: 0;
     pointer-events: none;
 }
 
@@ -327,28 +423,16 @@ body {
     to { stroke-dashoffset: -10; }
 }
 
-.country-row {
-    margin-bottom: 14px;
-}
-
+.country-row { margin-bottom: 14px; }
 .country-stats {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     margin-bottom: 5px;
     font-size: 13px;
     font-family: monospace;
 }
-
-.country-name {
-    color: #f8fafc;
-}
-
-.country-count {
-    color: #ff4d4d;
-    font-weight: bold;
-}
-
+.country-name { color: #f8fafc; }
+.country-count { color: #ff4d4d; font-weight: bold; }
 .country-bar {
     height: 3px;
     background-color: #1e293b;
@@ -356,9 +440,19 @@ body {
     border-radius: 2px;
     overflow: hidden;
 }
-
 .bar-fill {
     height: 100%;
     background-color: #ff4d4d;
-    transition: width 0.4s ease; /* ให้แถบสีแดงค่อยๆ ยืดอย่างนุ่มนวล */
+    transition: width 0.4s ease;
+}
+
+/* Responsive Rules for Small Screens */
+@media (max-width: 1024px) {
+    body, .app-layout, .main-dashboard {
+        height: auto;
+        overflow-y: auto;
+    }
+    .app-layout { flex-direction: column; }
+    #chatbot-iframe { width: 100%; height: 500px; }
+    .events-table tbody { max-height: 400px; }
 }
