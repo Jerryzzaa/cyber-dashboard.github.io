@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyberwatch SOC</title>
+    <link rel="stylesheet" href="dash.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">
+            <span class="dot red-dot"></span> CYBERWATCH SOC <span class="version">v2.4.1</span>
+        </div>
+        <div class="status-indicators">
+            <span><span class="dot green-dot"></span> IDS ONLINE</span>
+            <span><span class="dot green-dot"></span> FIREWALL ACTIVE</span>
+            <span><span class="dot yellow-dot"></span> THREAT LEVEL: HIGH</span>
+            <span class="time">07:50:02 UTC</span>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        
+        <div class="left-panel">
+            <div class="card">
+                <div class="card-title">ATTACKS TODAY</div>
+                <div class="kpi-value red-text">510</div>
+                <div class="kpi-subtext">↑ 23% vs yesterday</div>
+            </div>
+            <div class="card">
+                <div class="card-title">BLOCKED</div>
+                <div class="kpi-value blue-text">372</div>
+                <div class="kpi-subtext">72.9% block rate</div>
+            </div>
+            <div class="card">
+                <div class="card-title">CRITICAL ACTIVE</div>
+                <div class="kpi-value red-text">5</div>
+                <div class="kpi-subtext">Immediate action</div>
+            </div>
+            <div class="card">
+                <div class="card-title">AVG RESPONSE</div>
+                <div class="kpi-value green-text">2.3ms</div>
+                <div class="kpi-subtext">Last 1h P50</div>
+            </div>
+            <div class="card">
+            <div class="card-title" style="margin-bottom: 15px; color: #64748b;">TOP SOURCE COUNTRIES</div>
+                <div id="topCountriesList"></div>
+            </div>
+        </div>
+
+        <div class="center-panel">
+            <div class="top-row">
+                <div class="card map-card">
+                <div class="card-title">GLOBAL THREAT MAP</div>
+                <!-- เปลี่ยน class ตรงนี้ให้เป็น map-container เพื่อรับ CSS ของแผนที่ -->
+                <div class="map-container" style="position: relative; width: 100%; height: 250px; overflow: hidden;">
+
+                <!-- พื้นหลังตาราง -->
+                <div id="grid-background"></div>
+        
+                <!-- เส้นการโจมตีแบบเคลื่อนไหว (SVG) -->
+                <svg id="attack-lines" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
+        
+                <!-- โหนดประเทศและชื่อ -->
+                <div id="nodes-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+        
+                </div>
+                </div>
+                <div class="card chart-card">
+                    <div class="card-title">ATTACK TYPES</div>
+                    <div class="chart-container">
+                        <canvas id="attackTypeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card volume-card">
+                <div class="card-title">ATTACK VOLUME - LAST 24H</div>
+                <div class="chart-container-bar">
+                    <canvas id="attackVolumeChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card table-card">
+                <div class="table-header-filters">
+                    <span>FILTER:</span>
+                    <button class="filter-btn active" data-filter="ALL">ALL</button>
+                    <button class="filter-btn" data-filter="CRITICAL">CRITICAL</button>
+                    <button class="filter-btn" data-filter="HIGH">HIGH</button>
+                    <button class="filter-btn" data-filter="MEDIUM">MEDIUM</button>
+                    <button class="filter-btn" data-filter="LOW">LOW</button>
+                    <span id="event-count" style="margin-left: auto; font-size: 10px; color: #64748b;">12 events</span>
+            </div>
+
+            <table class="events-table">
+                <thead>
+                    <tr>
+                    <th>TIME</th>
+                    <th>SRC IP</th>
+                    <th>CC</th>
+                    <th>DST IP</th>
+                    <th>TYPE</th>
+                    <th>SEV</th>
+                    <th>PORT</th>
+                    <th>STATUS</th>
+                    <th style="text-align: right;">PKTS</th>
+                    </tr>
+                </thead>
+            <tbody id="eventsTableBody">
+        <!-- ข้อมูลจะถูกสร้างจาก JS -->
+    </tbody>
+</table>
+            </div>
+        </div>
+    </div>
+
+    <script src="dash.js"></script>
+</body>
+</html>
