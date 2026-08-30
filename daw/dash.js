@@ -11,7 +11,7 @@ function updateClock() {
 }
 
 setInterval(updateClock, 1000);
-updateClock(); // เรียกใช้ทันทีตอนโหลดหน้าupdateClock(); 
+updateClock(); 
 
 // --- สร้างกราฟ Bar (Top Talkers) สำหรับแถบ Right Sidebar ---
 document.addEventListener("DOMContentLoaded", function() {
