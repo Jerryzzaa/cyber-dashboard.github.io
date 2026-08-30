@@ -1,137 +1,3 @@
-body, html {
-    margin: 0; 
-    padding: 0; 
-    height: 100vh; 
-    background-color: #0b1121; 
-}
-
-.ai-sidebar {
-    width: 340px; 
-    height: 100vh;
-    background-color: #0b1121; 
-    border-left: 1px solid #1e293b;
-    display: flex;
-    flex-direction: column;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    box-sizing: border-box;
-}
-
-.ai-header {
-    padding: 16px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border-bottom: 1px solid #1e293b;
-    background-color: #0f172a;
-}
-
-.header-profile {
-    display: flex;
-    align-items: center;
-}
-
-.header-info {
-    display: flex; flex-direction: column;
-}
-
-.bot-name {
-    color: #f8fafc; font-weight: 600; font-size: 15px;
-}
-
-.bot-status {
-    color: #94a3b8; font-size: 12px; display: flex; align-items: center; gap: 5px; margin-top: 2px;
-}
-
-.status-dot {
-    width: 8px; height: 8px; background-color: #10b981; border-radius: 50%;
-}
-
-.close-icon {
-    color: #64748b; cursor: pointer; font-size: 18px; font-weight: bold;
-}
-.close-icon:hover { color: #f8fafc; }
-
-.chat-history {
-    flex: 1; 
-    padding: 20px; 
-    overflow-y: auto; 
-    display: flex; 
-    flex-direction: column; 
-    gap: 20px;
-}
-
-.chat-history::-webkit-scrollbar { width: 6px; }
-.chat-history::-webkit-scrollbar-thumb { background-color: #334155; border-radius: 10px; }
-
-.message-wrapper {
-    display: flex; flex-direction: column; max-width: 90%;
-}
-
-.message-wrapper.user {
-    align-self: flex-end; align-items: flex-end;
-}
-
-.message-wrapper.bot {
-    align-self: flex-start; align-items: flex-start;
-}
-
-.message-content {
-    display: flex; flex-direction: column; gap: 4px;
-}
-
-.message-wrapper.user .message-content { align-items: flex-end; }
-.message-wrapper.bot .message-content { align-items: flex-start; }
-
-.message-bubble {
-    padding: 10px 14px; font-size: 14px; line-height: 1.5; border-radius: 18px;
-    word-wrap: break-word;
-}
-
-.message-wrapper.bot .message-bubble {
-    background-color: #1e293b; color: #f8fafc;
-    border-bottom-left-radius: 4px; 
-}
-
-.message-wrapper.user .message-bubble {
-    background-color: #06b6d4; color: #0b1121; font-weight: 500;
-    border-bottom-right-radius: 4px; 
-}
-
-.message-time {
-    font-size: 11px; color: #64748b; margin: 0 4px;
-}
-
-.chat-bottom {
-    padding: 12px 16px 20px 16px; background-color: #0b1121; border-top: 1px solid #1e293b;
-}
-
-.suggestion-tags {
-    display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px;
-}
-.suggestion-tags::-webkit-scrollbar { display: none; }
-
-.tag-btn {
-    background: transparent; border: 1px solid #334155; color: #cbd5e1;
-    padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer; white-space: nowrap; transition: 0.2s;
-}
-.tag-btn:hover { background-color: #1e293b; border-color: #64748b; color: #f8fafc; }
-
-.input-container {
-    display: flex; align-items: center; background-color: #1e293b; border-radius: 24px; padding: 6px 6px 6px 16px;
-    border: 1px solid #334155; transition: border-color 0.2s;
-}
-.input-container:focus-within { border-color: #06b6d4; }
-
-#aiInput {
-    flex: 1; background: transparent; border: none; color: #f8fafc; font-size: 14px; outline: none; padding: 5px 0;
-}
-#aiInput::placeholder { color: #64748b; }
-
-.send-btn {
-    background-color: #06b6d4; border: none; border-radius: 50%; width: 36px; height: 36px;
-    display: flex; justify-content: center; align-items: center; color: #0b1121; cursor: pointer; transition: 0.2s; flex-shrink: 0;
-}
-.send-btn:hover { background-color: #22d3ee; transform: scale(1.05); }
 :root {
     --bg-main: #090e17;
     --bg-card: #111827;
@@ -281,8 +147,10 @@ body {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 15px;
+    padding: 8px;
     box-sizing: border-box;
+    padding-left: 20px;
+
 }
 
 .card-title {
@@ -328,8 +196,17 @@ body {
     flex-shrink: 0;
 }
 
-.map-card { flex: 2; }
-.chart-card { flex: 1; display: flex; flex-direction: column;}
+.map-card { 
+    flex: 1 1 auto;
+    width: auto;
+}
+.chart-card { 
+    flex: 0 0 210px; 
+    display: flex; 
+    padding: 10px;
+    width: 210px;
+    max-width: 210px;
+    flex-direction: column;}
 
 .map-container {
     position: relative;
@@ -339,24 +216,54 @@ body {
 }
 
 .chart-container { 
-    flex: 1; 
+    flex:0 0 120px; 
     position: relative; 
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 140px !important;
+    height: 110px;
+    width: 100%;
+    margin: auto 0;
 }
 
 .volume-card {
     height: 120px;
     flex-shrink: 0;
+    padding: 17px 20px;
 }
 
 .chart-container-bar { 
     height: 75px !important; 
     position: relative; 
 }
+/* =========================================
+   ย่อขนาดข้อมูลภายในกราฟวงกลม (Donut Chart)
+   ========================================= */
 
+/* ย่อตัวเลขและข้อความตรงกลางวงกลม */
+.chart-container .total-number,
+.chart-container div[style*="font-size"] {
+    font-size: 16px !important; /* ตัวเลขรวม เช่น 510 */
+}
+
+.chart-container .total-label {
+    font-size: 9px !important;  /* คำว่า Total */
+}
+
+/* ย่อรายการ Legend ด้านข้าง (SQL Inj, DDoS ฯลฯ) */
+.chart-card .legend-item,
+.chart-card li {
+    font-size: 10px !important;
+    margin-bottom: 3px !important;
+    gap: 6px !important;
+}
+
+/* ย่อจุดสีหน้า Legend */
+.chart-card .legend-dot,
+.chart-card span[style*="border-radius"] {
+    width: 5px !important;
+    height: 5px !important;
+}
 /* =========================================
    PERFECT GRID TABLE & SCROLLABLE LOGS
    ========================================= */
@@ -421,7 +328,7 @@ body {
 /* กำหนดความกว้างคอลัมน์ด้วย CSS Grid */
 .events-table tr {
     display: grid;
-    grid-template-columns: 80px 100px 40px 110px 1fr 90px 60px 100px 70px;
+    grid-template-columns: 70px 100px 40px 100px 1fr 90px 60px 110px 60px;
     align-items: center;
     padding: 6px 0;
     border-bottom: 1px solid rgba(30, 41, 59, 0.4);
@@ -438,7 +345,7 @@ body {
     font-size: 11px;
     font-weight: 600;
     text-align: left;
-    letter-spacing: -0.7px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
+    letter-spacing: 1px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
 }
 
 .events-table td {
@@ -448,8 +355,14 @@ body {
     padding: 4px 0;
     letter-spacing: -0.7px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
 }
-
-.events-table td:nth-child(2) { color: var(--color-cyan); } /* IP Color */
+.events-table td:nth-child(8) {
+    font-family:'JetBrains Mono', 'Consolas', 'Courier New', monospace; /* เปลี่ยนฟอนต์ตามต้องการ */
+    font-size: 11px !important;                          /* ปรับขนาดตัวอักษร */
+    font-weight: 700 !important;                         /* ปรับความหนาตัวอักษร */
+    letter-spacing: 0.5px !important;                    /* ปรับระยะห่างระหว่างตัวอักษรไม่ให้ซ้อนกัน */
+}
+.events-table td:nth-child(2) { 
+    color: var(--color-cyan); } /* IP Color */
 
 .events-table th:last-child, 
 .events-table td:last-child {
@@ -462,25 +375,45 @@ body {
 
 /* Badge Severities */
 .sev-critical { 
+    letter-spacing: 0.5px;
     color: var(--color-red); 
     border: 1px solid var(--color-red); 
     padding: 2px 6px; border-radius: 4px; 
     font-size: 10px; display: inline-block; text-align: center; }
 .sev-high { 
+    letter-spacing: 0.5px;
     color: var(--color-orange); 
     border: 1px solid var(--color-orange); 
     padding: 2px 6px; border-radius: 4px; 
     font-size: 10px; display: inline-block; text-align: center; }
 .sev-medium { 
+    letter-spacing: 0.5px;
     color: var(--color-yellow); 
     border: 1px solid var(--color-yellow); 
     padding: 2px 6px; border-radius: 4px; 
     font-size: 10px; display: inline-block; text-align: center; }
 .sev-low { 
+    letter-spacing: 0.5px;
     color: var(--color-cyan); 
     border: 1px solid var(--color-cyan); 
     padding: 2px 6px; border-radius: 4px; 
     font-size: 10px; display: inline-block; text-align: center; }
+
+/* ปรับสีแยกรายสถานะ */
+.status-blocked {
+    color: #10b981 !important; /* สีเขียว */
+    letter-spacing: 2px;
+}
+
+.status-detected {
+    color: #eab308 !important; /* สีเหลือง */
+    letter-spacing: 2px;
+}
+
+.status-mitigated {
+    color: #3b82f6 !important; /* สีฟ้า */
+    letter-spacing: 2px;
+}
 
 /* Map Visualization Styles */
 #grid-background {
@@ -573,11 +506,11 @@ body {
     to { stroke-dashoffset: -10; }
 }
 
-.country-row { margin-bottom: 14px; }
+.country-row { margin-bottom: 10px; }
 .country-stats {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     font-size: 13px;
     font-family: monospace;
 }
@@ -624,6 +557,8 @@ body {
     letter-spacing: 0.8px;
     margin-bottom: 20px;
     line-height: 1.4;
+    font-family: 'Rajdhani', sans-serif; /* เปลี่ยนชื่อฟอนต์ตามต้องการ (เช่น 'Inter', 'JetBrains Mono') */
+    color: #64748b;
 }
 
 /* เลย์เอาต์ตารางแสดง Port 2 คอลัมน์ */
@@ -642,9 +577,8 @@ body {
     justify-content: center;
     gap: 10px;
     color: #cbd5e1;
-    font-size: 13px;
-    font-weight: 500;
-}
+    font-size: 11px;
+    font-weight: 500; }
 
 /* แถบสีทรงแคปซูล (Pill Shape) */
 .port-item span {
@@ -653,13 +587,4 @@ body {
     height: 8px;
     border-radius: 10px;
     flex-shrink: 0;
-}
-.typing-dots { display: flex; gap: 4px; padding: 6px 4px; }
-.dot { width: 6px; height: 6px; background-color: #94a3b8; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
-.dot:nth-child(1) { animation-delay: -0.32s; }
-.dot:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes bounce {
-    0%, 80%, 100% { transform: scale(0); } 
-    40% { transform: scale(1); }
 }
