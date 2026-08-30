@@ -55,7 +55,7 @@ function initCharts() {
     // สีที่ปรับใหม่ให้เหมือนรูปต้นฉบับมากขึ้น
     const chartColors = ['#ff4d4d', '#ff9f43', '#00cec9', '#a29bfe', '#2ed573', '#747d8c'];
 
-    // ปลั๊กอินเสริมสำหรับเขียนข้อความ "Total 510" ตรงกลางโดนัท
+    // ปลั๊กอินเสริมสำหรับเขียนข้อความ "Total 510" ตรงกลางโดนัท (ย่อขนาดฟอนต์แล้ว)
     const centerTextPlugin = {
         id: 'centerText',
         beforeDraw: function(chart) {
@@ -71,15 +71,15 @@ function initCharts() {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            // วาดคำว่า "Total"
-            ctx.font = "12px 'Segoe UI', sans-serif";
+            /* [จุดแก้ที่ 1 - บรรทัด 67] ย่อขนาดคำว่า Total จาก 12px เหลือ 9px */
+            ctx.font = "9px 'Segoe UI', sans-serif";
             ctx.fillStyle = "#64748b";
-            ctx.fillText("Total", centerX, centerY - 10);
+            ctx.fillText("Total", centerX, centerY - 8);
 
-            // วาดตัวเลข "510"
-            ctx.font = "bold 20px 'Segoe UI', sans-serif";
+            /* [จุดแก้ที่ 2 - บรรทัด 72] ย่อขนาดตัวเลข 510 จาก 20px เหลือ 14px */
+            ctx.font = "bold 14px 'Segoe UI', sans-serif";
             ctx.fillStyle = "#ffffff";
-            ctx.fillText("510", centerX, centerY + 12);
+            ctx.fillText("510", centerX, centerY + 7);
             ctx.restore();
         }
     };
@@ -107,7 +107,7 @@ function initCharts() {
             responsive: true,
             maintainAspectRatio: false,
             layout: {
-                padding: 10
+                padding: 0 /* [จุดแก้ที่ 3 - บรรทัด 99] เปลี่ยนจาก 10 เป็น 0 เพื่อให้วงกลมไม่โดนบีบ */
             },
             plugins: {
                 legend: { 
@@ -116,15 +116,16 @@ function initCharts() {
                         color: '#e2e8f0', 
                         usePointStyle: true, 
                         pointStyle: 'circle', 
+                        boxWidth: 6, /* [จุดแก้ที่ 4] เพิ่มบรรทัดนี้เพื่อย่อจุดสี */
                         font: {
                             family: 'monospace', 
-                            size: 12
+                            size: 10 /* [จุดแก้ที่ 5 - บรรทัด 111] ย่อขนาดฟอนต์ข้อความข้างๆ จาก 12 เหลือ 10 */
                         },
-                        padding: 15
+                        padding: 6 /* [จุดแก้ที่ 6 - บรรทัด 113] ลดระยะห่างบรรทัดจาก 15 เหลือ 6 */
                     } 
                 }
             },
-            cutout: '70%'
+            cutout: '68%'
         },
         plugins: [centerTextPlugin]
     });
