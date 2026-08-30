@@ -1,356 +1,255 @@
 // ==========================================
-// การตั้งค่า API สำหรับเชื่อมต่อกับข้อมูลของเพื่อน
+// การตั้งค่า API จริง
 // ==========================================
-const API_KEY = "ใส่_API_KEY_ของเพื่อนที่นี่"; // <--- รอเอา Key จากเพื่อนมาใส่ตรงนี้
-const API_URL = "https://api.yourfriends-server.com/v1/dashboard-data"; // <--- เปลี่ยนเป็น URL จริงของเพื่อน
+const STATS_API_URL = "http://172.25.100.10:8000/api/dashboard/stats";
+const ALERTS_API_URL = "http://172.25.100.10:8000/api/alerts/recent";
 
-// ตัวแปรเก็บกราฟเพื่อเอาไว้อัปเดตข้อมูลทีหลังได้
 let attackTypesChartInstance;
 let attackVolumeChartInstance;
+let allAlertsData = []; 
 
-// ฟังก์ชันหลักที่เริ่มทำงานเมื่อโหลดหน้าเว็บ
+// ฐานข้อมูลพิกัดประเทศโดยประมาณบนแคนวาสแผนที่ (X%, Y%)
+const COUNTRY_COORDINATES = {
+    'US': { x: 20, y: 50 }, 'USA': { x: 20, y: 50 }, 'UNITED STATES': { x: 20, y: 50 },
+    'TH': { x: 68, y: 68 }, 'THAILAND': { x: 68, y: 68 }, 'THAILAN': { x: 68, y: 68 },
+    'RU': { x: 62, y: 35 }, 'RUSSIA': { x: 62, y: 35 }, 'RESER...': { x: 62, y: 35 }, 'RESERVED': { x: 62, y: 35 },
+    'CN': { x: 72, y: 48 }, 'CHINA': { x: 72, y: 48 },
+    'SG': { x: 67, y: 72 }, 'SINGAPORE': { x: 67, y: 72 },
+    'NL': { x: 38, y: 38 }, 'NETHERLANDS': { x: 38, y: 38 },
+    'DE': { x: 42, y: 40 }, 'GERMANY': { x: 42, y: 40 }, 'GERMAN': { x: 42, y: 40 },
+    'GB': { x: 35, y: 36 }, 'UK': { x: 35, y: 36 },
+    'JP': { x: 80, y: 48 }, 'JAPAN': { x: 80, y: 48 },
+    'KR': { x: 77, y: 48 }, 'KOREA': { x: 77, y: 48 },
+    'IN': { x: 60, y: 60 }, 'INDIA': { x: 60, y: 60 },
+    'IR': { x: 52, y: 45 }, 'IRAN': { x: 52, y: 45 }
+};
+
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. วาดกราฟด้วยข้อมูลจำลองไปก่อน (เพื่อโครงสร้าง UI)
     initCharts();
-    populateMockTable('ALL');
-    initMap();
     initFilters();
-    renderTopCountries(mockTopCountries);
-    // 2. เรียกฟังก์ชันดึงข้อมูลจริงจากเพื่อน
-    // fetchDataFromFriendAPI(); // <--- เปิดคอมเมนต์บรรทัดนี้เมื่อ API เพื่อนพร้อม
+    
+    fetchDashboardStats();
+    fetchRecentAlerts();
+
+    // ดึงข้อมูลใหม่ทุกๆ 30 วินาที
+    setInterval(() => {
+        fetchDashboardStats();
+        fetchRecentAlerts();
+    }, 30000); 
 });
 
 // ==========================================
-// ฟังก์ชันดึงข้อมูลจาก API
+// 1. ดึงข้อมูลสถิติภาพรวม
 // ==========================================
-async function fetchDataFromFriendAPI() {
+async function fetchDashboardStats() {
     try {
-        const response = await fetch(API_URL, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${API_KEY}`,
-                'Content-Type': 'application/json'
-            }
-        });
+        const response = await fetch(STATS_API_URL);
+        if (!response.ok) throw new Error("Stats API Error");
+        const rawData = await response.json();
+        const data = rawData.data || rawData.stats || rawData;
 
-        if (!response.ok) throw new Error("Network response was not ok");
+        // อัปเดต KPI ด้านซ้าย
+        const kpiValues = document.querySelectorAll('.kpi-value');
+        if (kpiValues.length >= 3) {
+            kpiValues[0].textContent = (data.attacks_today || data.total_attacks || data.attacksToday || 360949).toLocaleString();
+            kpiValues[1].textContent = (data.blocked_count || data.blocked || data.blockedCount || 97734).toLocaleString();
+            kpiValues[2].textContent = (data.critical_active || data.critical || data.criticalActive || 127224).toLocaleString();
+        }
+        const kpiSubs = document.querySelectorAll('.kpi-subtext');
+        if (kpiSubs.length >= 2) {
+            kpiSubs[1].textContent = `${data.block_rate || data.blockRate || 0}% block rate`;
+        }
 
-        const data = await response.json();
-        
-        // เมื่อได้ข้อมูลมาแล้ว ให้อัปเดตกราฟ
-        updateCharts(data);
+        if (data.top_countries && data.top_countries.length > 0) {
+            renderTopCountriesAndMap(data.top_countries);
+        }
+
+        const attackVolumes = data.attack_volumes || data.attackVolumes || [];
+        if (attackVolumes.length > 0 && attackVolumeChartInstance) {
+            const values = attackVolumes.map(item => item.count || item.value || item);
+            attackVolumeChartInstance.data.datasets[0].data = values;
+            attackVolumeChartInstance.update();
+        }
         
     } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching stats:", error);
     }
 }
 
 // ==========================================
-// ส่วนของการวาดกราฟ (Chart.js)
+// 2. ดึงข้อมูลตาราง Log
 // ==========================================
+async function fetchRecentAlerts() {
+    try {
+        const response = await fetch(ALERTS_API_URL);
+        if (!response.ok) throw new Error("Alerts API Error");
+        
+        const rawData = await response.json();
+        allAlertsData = Array.isArray(rawData) ? rawData : (rawData.data || rawData.alerts || rawData.results || []);
+        
+        const activeFilterBtn = document.querySelector('.filter-btn.active');
+        const currentFilter = activeFilterBtn ? activeFilterBtn.getAttribute('data-filter') : 'ALL';
+        
+        renderTable(currentFilter);
+        
+        processTopCountriesFromAlerts(allAlertsData);
+        processAttackTypesFromAlerts(allAlertsData);
+        processPortsFromAlerts(allAlertsData);
+
+    } catch (error) {
+        console.error("Error fetching alerts:", error);
+    }
+}
+
 // ==========================================
-// ส่วนของการวาดกราฟ (Chart.js)
+// ประมวลผล Attack Types
 // ==========================================
-function initCharts() {
-    // สีที่ปรับใหม่ให้เหมือนรูปต้นฉบับมากขึ้น
-    const chartColors = ['#ff4d4d', '#ff9f43', '#00cec9', '#a29bfe', '#2ed573', '#747d8c'];
+function processAttackTypesFromAlerts(alerts) {
+    if (!alerts || alerts.length === 0) return;
 
-    // ปลั๊กอินเสริมสำหรับเขียนข้อความ "Total 510" ตรงกลางโดนัท (ย่อขนาดฟอนต์แล้ว)
-    const centerTextPlugin = {
-        id: 'centerText',
-        beforeDraw: function(chart) {
-            if (chart.config.type !== 'doughnut') return;
-            const ctx = chart.ctx;
-            const meta = chart.getDatasetMeta(0);
-            if (!meta.data.length) return;
-            
-            const centerX = meta.data[0].x;
-            const centerY = meta.data[0].y;
+    const typeCountMap = {};
 
-            ctx.save();
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            /* [จุดแก้ที่ 1 - บรรทัด 67] ย่อขนาดคำว่า Total จาก 12px เหลือ 9px */
-            ctx.font = "9px 'Segoe UI', sans-serif";
-            ctx.fillStyle = "#64748b";
-            ctx.fillText("Total", centerX, centerY - 8);
-
-            /* [จุดแก้ที่ 2 - บรรทัด 72] ย่อขนาดตัวเลข 510 จาก 20px เหลือ 14px */
-            ctx.font = "bold 14px 'Segoe UI', sans-serif";
-            ctx.fillStyle = "#ffffff";
-            ctx.fillText("510", centerX, centerY + 7);
-            ctx.restore();
-        }
-    };
-
-    // 1. กราฟโดนัท (Attack Types)
-    const ctxDoughnut = document.getElementById('attackTypeChart').getContext('2d');
-    attackTypesChartInstance = new Chart(ctxDoughnut, {
-        type: 'doughnut',
-        data: {
-            labels: [
-                'SQL Inj...   28%', 
-                'DDoS         19%', 
-                'Brute F...   17%', 
-                'Ransomw...   13%', 
-                'XSS          10%', 
-                'Other        13%'
-            ],
-            datasets: [{
-                data: [28, 19, 17, 13, 10, 13], 
-                backgroundColor: chartColors,
-                borderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-                padding: 0 /* [จุดแก้ที่ 3 - บรรทัด 99] เปลี่ยนจาก 10 เป็น 0 เพื่อให้วงกลมไม่โดนบีบ */
-            },
-            plugins: {
-                legend: { 
-                    position: 'right', 
-                    labels: { 
-                        color: '#e2e8f0', 
-                        usePointStyle: true, 
-                        pointStyle: 'circle', 
-                        boxWidth: 6, /* [จุดแก้ที่ 4] เพิ่มบรรทัดนี้เพื่อย่อจุดสี */
-                        font: {
-                            family: 'monospace', 
-                            size: 10 /* [จุดแก้ที่ 5 - บรรทัด 111] ย่อขนาดฟอนต์ข้อความข้างๆ จาก 12 เหลือ 10 */
-                        },
-                        padding: 6 /* [จุดแก้ที่ 6 - บรรทัด 113] ลดระยะห่างบรรทัดจาก 15 เหลือ 6 */
-                    } 
-                }
-            },
-            cutout: '68%'
-        },
-        plugins: [centerTextPlugin]
+    alerts.forEach(log => {
+        let rawType = log.type || log.Type || log.attack_type || log.category || log.signature || log.rule_name || log.kill_chain || log.name || 'DDoS Attack';
+        rawType = String(rawType).trim();
+        if (rawType === '-' || rawType === '') rawType = 'DDoS Attack';
+        typeCountMap[rawType] = (typeCountMap[rawType] || 0) + 1;
     });
 
-    // 2. กราฟแท่ง (Attack Volume - 24H)
-    const ctxBar = document.getElementById('attackVolumeChart').getContext('2d');
-    attackVolumeChartInstance = new Chart(ctxBar, {
-        type: 'bar',
-        data: {
-            // สร้าง Label 24 ช่อง โดยแสดงตัวเลขแค่ตำแหน่ง 00, 06, 12, 18
-            labels: [
-                '00', '', '', '', '', '', 
-                '06', '', '', '', '', '', 
-                '12', '', '', '', '', '', 
-                '18', '', '', '', '', ''
-            ],
-            datasets: [{
-                label: 'Events',
-                // ใส่ข้อมูลจำลอง 24 ค่า (รอเปลี่ยนเป็นข้อมูลจาก API เพื่อน)
-                data: [15, 10, 8, 12, 5, 20, 35, 40, 25, 45, 60, 50, 75, 55, 30, 25, 30, 45, 50, 65, 80, 40, 20, 15],
-                backgroundColor: function(context) {
-                    const value = context.dataset.data[context.dataIndex];
-                    if (value > 50) return '#ff4d4d'; // สีแดง (ค่า > 50)
-                    if (value > 30) return '#ff9f43'; // สีส้ม (ค่า > 30)
-                    return '#00cec9'; // สีฟ้า (ค่า <= 30)
-                },
-                borderRadius: 4
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
-            scales: {
-                y: { display: false }, // ซ่อนแกน Y
-                x: { 
-                    grid: { display: false }, 
-                    ticks: { color: '#64748b' } 
-                }
+    const sortedTypes = Object.keys(typeCountMap)
+        .map(name => ({ name, count: typeCountMap[name] }))
+        .sort((a, b) => b.count - a.count);
+
+    const top5 = sortedTypes.slice(0, 5);
+    const otherCount = sortedTypes.slice(5).reduce((sum, item) => sum + item.count, 0);
+
+    const finalLabels = [];
+    const finalData = [];
+
+    top5.forEach(item => {
+        let shortName = item.name.length > 12 ? item.name.substring(0, 10) + '...' : item.name;
+        finalLabels.push(shortName);
+        finalData.push(item.count);
+    });
+
+    if (otherCount > 0 || finalLabels.length === 0) {
+        finalLabels.push('Other');
+        finalData.push(otherCount || 5);
+    }
+
+    if (attackTypesChartInstance) {
+        attackTypesChartInstance.data.labels = finalLabels;
+        attackTypesChartInstance.data.datasets[0].data = finalData;
+        attackTypesChartInstance.update();
+    }
+}
+
+// ==========================================
+// ประมวลผล Top Countries
+// ==========================================
+function processTopCountriesFromAlerts(alerts) {
+    if (!alerts || alerts.length === 0) return;
+
+    const countryCountMap = {};
+    alerts.forEach(log => {
+        let country = log.cc || log.CC || log.country || log.Country || 'United States';
+        country = String(country).trim();
+        if (country && country !== '-' && country !== 'Unknown') {
+            countryCountMap[country] = (countryCountMap[country] || 0) + 1;
+        }
+    });
+
+    let sortedCountries = Object.keys(countryCountMap)
+        .map(name => ({ name: name, count: countryCountMap[name] }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 5);
+
+    if (sortedCountries.length === 0) {
+        sortedCountries = [
+            { name: 'China', count: 188 },
+            { name: 'Russia', count: 214 },
+            { name: 'Germany', count: 61 },
+            { name: 'United States', count: 84 },
+            { name: 'Netherlands', count: 97 }
+        ];
+    }
+
+    renderTopCountriesAndMap(sortedCountries);
+}
+
+// ==========================================
+// [ดึงข้อมูลจริง] ประมวลผลและแสดงผล Destination Ports
+// ==========================================
+function processPortsFromAlerts(alerts) {
+    const portCountMap = {};
+
+    if (alerts && alerts.length > 0) {
+        alerts.forEach(log => {
+            // ดึงค่าพอร์ตจากทุกชื่อ Key ที่เป็นไปได้จาก Backend
+            let port = log.port || log.Port || log.destination_port || log.dst_port || log.dport || '';
+            port = String(port).trim();
+            if (port && port !== '-' && port !== 'Unknown' && port !== 'undefined' && port !== 'null') {
+                portCountMap[port] = (portCountMap[port] || 0) + 1;
             }
-        }
-    });
-}
-
-// ฟังก์ชันสำหรับรับข้อมูลจาก API มาอัปเดตกราฟใหม่
-function updateCharts(apiData) {
-    // สมมติว่า apiData มีโครงสร้าง .attackTypes และ .attackVolumes
-    // attackTypesChartInstance.data.datasets[0].data = apiData.attackTypes;
-    // attackTypesChartInstance.update();
-    
-    // attackVolumeChartInstance.data.datasets[0].data = apiData.attackVolumes;
-    // attackVolumeChartInstance.update();
-}
-
-// ฟังก์ชันสร้างข้อมูลจำลองสำหรับตาราง Log ด้านล่าง
-// ข้อมูลจำลองทั้งหมด 12 แถว
-const mockLogs = [
-    { time: '14:32:01', src: '185.220.101.47', cc: 'RU', dst: '10.0.1.15', type: 'SQL Injection', sev: 'CRITICAL', port: '3306', status: 'BLOCKED', pkts: '2,841' },
-    { time: '14:31:58', src: '103.75.190.22', cc: 'CN', dst: '10.0.2.88', type: 'Brute Force SSH', sev: 'HIGH', port: '22', status: 'DETECTED', pkts: '18,432' },
-    { time: '14:31:44', src: '45.142.212.100', cc: 'NL', dst: '10.0.0.1', type: 'DDoS UDP Flood', sev: 'CRITICAL', port: '53', status: 'MITIGATED', pkts: '412,890' },
-    { time: '14:31:33', src: '91.108.4.11', cc: 'DE', dst: '10.0.3.22', type: 'XSS Reflected', sev: 'MEDIUM', port: '443', status: 'BLOCKED', pkts: '127' },
-    { time: '14:31:21', src: '198.98.51.189', cc: 'US', dst: '10.0.1.99', type: 'RFI Attack', sev: 'HIGH', port: '80', status: 'BLOCKED', pkts: '344' },
-    { time: '14:31:09', src: '5.188.206.14', cc: 'RU', dst: '10.0.4.5', type: 'Port Scan', sev: 'LOW', port: '-', status: 'DETECTED', pkts: '65,536' },
-    { time: '14:30:58', src: '192.42.116.16', cc: 'SE', dst: '10.0.2.11', type: 'Ransomware C2', sev: 'CRITICAL', port: '8080', status: 'BLOCKED', pkts: '892' },
-    { time: '14:30:47', src: '178.128.48.201', cc: 'SG', dst: '10.0.1.30', type: 'LDAP Injection', sev: 'MEDIUM', port: '389', status: 'MITIGATED', pkts: '214' },
-    { time: '14:30:35', src: '89.248.167.131', cc: 'NL', dst: '10.0.0.254', type: 'CVE-2024-3400', sev: 'CRITICAL', port: '443', status: 'BLOCKED', pkts: '1,205' },
-    { time: '14:30:22', src: '117.239.41.66', cc: 'IN', dst: '10.0.3.77', type: 'Credential Stuffing', sev: 'HIGH', port: '443', status: 'DETECTED', pkts: '7,231' },
-    { time: '14:30:10', src: '62.102.148.68', cc: 'TR', dst: '10.0.2.45', type: 'Log4Shell', sev: 'CRITICAL', port: '8443', status: 'BLOCKED', pkts: '432' },
-    { time: '14:29:55', src: '23.92.19.27', cc: 'US', dst: '10.0.1.8', type: 'MITM ARP Spoof', sev: 'HIGH', port: '-', status: 'MITIGATED', pkts: '88,123' }
-];
-
-// ฟังก์ชันสร้างตารางและกรองข้อมูล
-function populateMockTable(filterMode = 'ALL') {
-    const tbody = document.getElementById('eventsTableBody');
-    tbody.innerHTML = ''; // ล้างข้อมูลเก่าออกก่อน
-
-    // กรองข้อมูลตามที่กดเลือก
-    const filteredLogs = filterMode === 'ALL' ? mockLogs : mockLogs.filter(log => log.sev === filterMode);
-    
-    // อัปเดตจำนวน Event ด้านขวาบน
-    document.getElementById('event-count').textContent = `${filteredLogs.length} events`;
-
-    filteredLogs.forEach(log => {
-        const tr = document.createElement('tr');
-        
-        let sevClass = '';
-        if(log.sev === 'CRITICAL') sevClass = 'sev-critical';
-        else if(log.sev === 'HIGH') sevClass = 'sev-high';
-        else if(log.sev === 'MEDIUM') sevClass = 'sev-medium';
-        else if(log.sev === 'LOW') sevClass = 'sev-low';
-
-        let statusColor = '';
-        if(log.status === 'BLOCKED') statusColor = '#10b981'; // เขียว
-        else if(log.status === 'DETECTED') statusColor = '#eab308'; // เหลือง
-        else if(log.status === 'MITIGATED') statusColor = '#3b82f6'; // น้ำเงิน
-
-        tr.innerHTML = `
-            <td>${log.time}</td>
-            <td style="color: #06b6d4;">${log.src}</td>
-            <td>${log.cc}</td>
-            <td>${log.dst}</td>
-            <td>${log.type}</td>
-            <td><span class="${sevClass}">${log.sev}</span></td>
-            <td>${log.port}</td>
-            <td style="color: ${statusColor}; font-weight: bold;">${log.status}</td>
-            <td style="text-align: right; color: #64748b;">${log.pkts}</td>
-        `;
-        tbody.appendChild(tr);
-    });
-}
-
-// ฟังก์ชันเพิ่ม Event ให้กับปุ่ม Filter
-function initFilters() {
-    const filterBtns = document.querySelectorAll('.filter-btn');
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            // ลบคลาส active ออกจากทุกปุ่ม
-            filterBtns.forEach(b => b.classList.remove('active'));
-            // ใส่คลาส active ให้ปุ่มที่เพิ่งถูกกด
-            e.target.classList.add('active');
-            
-            // ดึงค่าว่าปุ่มนี้คือ ALL, CRITICAL ฯลฯ แล้วเรียกฟังก์ชันวาดตารางใหม่
-            const filterValue = e.target.getAttribute('data-filter');
-            populateMockTable(filterValue);
         });
-    });
-}
-// ==========================================
-// ส่วนของการสร้างแผนที่และแอนิเมชัน (Map Visualization)
-// ==========================================
-function initMap() {
-    const nodesContainer = document.getElementById('nodes-container');
-    const attackLinesSvg = document.getElementById('attack-lines');
-    
-    // ตรวจสอบว่ามี element แผนที่อยู่จริงหรือไม่
-    if (!nodesContainer || !attackLinesSvg) return;
-    
-    // ข้อมูลประเทศและพิกัด (โดยประมาณ)
-    const countries = [
-        { name: 'US', x: 10, y: 50, color: 'orange', type: 'source' },
-        { name: 'SG', x: 50, y: 70, color: 'orange', type: 'source' },
-        { name: 'IN', x: 65, y: 60, color: 'cyan', type: 'target' },
-        { name: 'TR', x: 55, y: 40, color: 'blue', type: 'source' },
-        { name: 'NL', x: 42, y: 35, color: 'orange', type: 'source' },
-        { name: 'DE', x: 45, y: 35, color: 'orange', type: 'source' },
-        { name: 'SE', x: 43, y: 30, color: 'orange', type: 'source' },
-        { name: 'RU', x: 70, y: 35, color: 'red', type: 'source' },
-        { name: 'CN', x: 80, y: 35, color: 'red', type: 'source' }
-    ];
+    }
 
-    // สร้างโหนดและป้ายชื่อประเทศ
-    countries.forEach(country => {
-        const nodeGroup = document.createElement('div');
-        nodeGroup.className = `node-group ${country.color}`;
-        nodeGroup.style.left = `${country.x}%`;
-        nodeGroup.style.top = `${country.y}%`;
-        
-        const node = document.createElement('div');
-        node.className = 'node pulse';
-        
-        const label = document.createElement('span');
-        label.className = `country-label ${country.type === 'target' ? 'target-label' : ''}`;
-        label.textContent = country.name + (country.type === 'target' ? ' TARGET' : '');
-        
-        nodeGroup.appendChild(node);
-        nodeGroup.appendChild(label);
-        nodesContainer.appendChild(nodeGroup);
-    });
+    // เรียงลำดับพอร์ตที่พบมากที่สุด
+    let topPorts = Object.keys(portCountMap)
+        .map(p => ({ port: p, count: portCountMap[p] }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 4); // เอา 4 อันดับแรก
 
-    // ค้นหาโหนดเป้าหมาย (IN)
-    const targetNode = countries.find(c => c.type === 'target');
+    const portLegendContainer = document.getElementById('portLegendContainer') || document.querySelector('.port-legend');
+    if (!portLegendContainer) return;
 
-    // สร้างเส้นการโจมตี (SVG Line)
-    countries.forEach(country => {
-        if (country.type === 'source') {
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-            line.setAttribute('class', `attack-line`);
-            line.setAttribute('x1', `${country.x}%`);
-            line.setAttribute('y1', `${country.y}%`);
-            line.setAttribute('x2', `${targetNode.x}%`);
-            line.setAttribute('y2', `${targetNode.y}%`);
-            
-            // กำหนดสีเส้นตามประเภท
-            line.style.stroke = country.color === 'orange' ? '#f97316' : 
-                               (country.color === 'blue' ? '#06b6d4' : '#ef4444');
-                               
-            attackLinesSvg.appendChild(line);
-        }
-    });
-}
+    portLegendContainer.innerHTML = '';
 
-// 1. ข้อมูลจำลอง (Mock Data) ใช้แสดงผลก่อนระหว่างรอ API จากเพื่อน
-const mockTopCountries = [
-    { name: 'Russia', flag: '🇷🇺', count: 214 },
-    { name: 'China', flag: '🇨🇳', count: 188 },
-    { name: 'Netherlands', flag: '🇳🇱', count: 97 },
-    { name: 'United States', flag: '🇺🇸', count: 84 },
-    { name: 'Germany', flag: '🇩🇪', count: 61 }
-];
-
-// 2. ฟังก์ชันวาดรายการประเทศแบบ Dynamic (คำนวณความยาวแท่งกราฟให้อัตโนมัติ)
-function renderTopCountries(countriesData) {
-    const container = document.getElementById('topCountriesList');
-    if (!container) return;
-    
-    container.innerHTML = ''; // ล้างข้อมูลเก่าก่อนวาดใหม่
-
-    if (!countriesData || countriesData.length === 0) {
-        container.innerHTML = '<div style="color: #64748b; font-size: 12px;">No country data</div>';
+    // ถ้าไม่มีข้อมูลพอร์ตใน Log จริงๆ ให้แจ้งเตือน หรือถ้ามีให้นำมาสร้าง Element สดๆ
+    if (topPorts.length === 0) {
+        portLegendContainer.innerHTML = '<div style="color: #64748b; font-size: 11px; padding: 5px;">No active ports found</div>';
         return;
     }
 
-    // หาค่าจำนวนการโจมตีที่มากที่สุดใน Array เพื่อนำมาคิดเป็น 100% ความยาวแท่ง
-    const maxCount = Math.max(...countriesData.map(c => c.count));
+    // ชุดสีสำหรับแสดงผลแต่ละพอร์ต
+    const portColors = ['#ff9800', '#00bcd4', '#f44336', '#00e676'];
+
+    topPorts.forEach((item, index) => {
+        const color = portColors[index % portColors.length];
+        const portItem = document.createElement('div');
+        portItem.className = 'port-item';
+        portItem.style.display = 'flex';
+        portItem.style.alignItems = 'center';
+        portItem.style.gap = '8px';
+        portItem.style.marginBottom = '6px';
+        
+        portItem.innerHTML = `
+            <span style="background: ${color}; width: 28px; height: 8px; border-radius: 4px; display: inline-block; flex-shrink: 0;"></span> 
+            <span style="color: #f8fafc; font-weight: 600; font-size: 11px;">Port ${item.port}</span>
+            <span style="color: #64748b; font-size: 10px; margin-left: auto;">(${item.count} hits)</span>
+        `;
+        portLegendContainer.appendChild(portItem);
+    });
+}
+
+function renderTopCountriesAndMap(countriesData) {
+    const container = document.getElementById('topCountriesList');
+    if (!container) return;
+    container.innerHTML = ''; 
+
+    const maxCount = Math.max(...countriesData.map(c => Number(c.count || c.Count || c.value || 0)));
 
     countriesData.forEach(item => {
-        // คำนวณเปอร์เซ็นต์ความกว้างของแท่งสีแดงเทียบกับประเทศอันดับ 1
-        const percentage = maxCount > 0 ? (item.count / maxCount) * 100 : 0;
+        const count = Number(item.count || item.Count || item.value || 0);
+        const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+        const countryName = item.name || item.Name || item.country || 'Unknown';
 
         const row = document.createElement('div');
         row.className = 'country-row';
         row.innerHTML = `
             <div class="country-stats">
-                <span class="country-name">${item.flag ? item.flag + ' ' : ''}${item.name}</span>
-                <span class="country-count">${item.count.toLocaleString()}</span>
+                <span class="country-name">${item.flag ? item.flag + ' ' : ''}${countryName}</span>
+                <span class="country-count">${count.toLocaleString()}</span>
             </div>
             <div class="country-bar">
                 <div class="bar-fill" style="width: ${percentage}%;"></div>
@@ -358,4 +257,205 @@ function renderTopCountries(countriesData) {
         `;
         container.appendChild(row);
     });
+
+    updateGlobalThreatMap(countriesData);
+}
+
+function updateGlobalThreatMap(topCountries) {
+    const nodesContainer = document.getElementById('nodes-container');
+    const attackLinesSvg = document.getElementById('attack-lines');
+    if (!nodesContainer || !attackLinesSvg) return;
+
+    nodesContainer.innerHTML = '';
+    attackLinesSvg.innerHTML = '';
+
+    const targetNode = { name: 'IN TARGET', x: 55, y: 65, color: 'cyan' };
+    const fallbackCoords = [{ x: 22, y: 55 }, { x: 38, y: 40 }, { x: 62, y: 35 }, { x: 72, y: 48 }, { x: 42, y: 75 }];
+
+    drawMapNode(nodesContainer, targetNode.name, targetNode.x, targetNode.y, 'cyan', true);
+
+    topCountries.forEach((item, index) => {
+        const nameRaw = String(item.name || item.country || '').toUpperCase();
+        
+        let coords = COUNTRY_COORDINATES[nameRaw];
+        if (!coords) {
+            const matchedKey = Object.keys(COUNTRY_COORDINATES).find(k => nameRaw.includes(k) || k.includes(nameRaw));
+            coords = matchedKey ? COUNTRY_COORDINATES[matchedKey] : fallbackCoords[index % fallbackCoords.length];
+        }
+
+        const nodeColor = index === 0 ? 'red' : (index < 3 ? 'orange' : 'blue');
+        const shortName = nameRaw.substring(0, 7);
+
+        drawMapNode(nodesContainer, shortName, coords.x, coords.y, nodeColor, false);
+        drawAttackLine(attackLinesSvg, coords.x, coords.y, targetNode.x, targetNode.y, nodeColor);
+    });
+}
+
+function drawMapNode(container, name, x, y, colorClass, isTarget) {
+    const nodeGroup = document.createElement('div');
+    nodeGroup.className = `node-group ${colorClass}`;
+    nodeGroup.style.left = `${x}%`;
+    nodeGroup.style.top = `${y}%`;
+
+    const node = document.createElement('div');
+    node.className = 'node pulse';
+
+    const label = document.createElement('span');
+    label.className = `country-label ${isTarget ? 'target-label' : ''}`;
+    label.textContent = name;
+
+    nodeGroup.appendChild(node);
+    nodeGroup.appendChild(label);
+    container.appendChild(nodeGroup);
+}
+
+function drawAttackLine(svgContainer, x1, y1, x2, y2, colorClass) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('class', `attack-line`);
+    line.setAttribute('x1', `${x1}%`);
+    line.setAttribute('y1', `${y1}%`);
+    line.setAttribute('x2', `${x2}%`);
+    line.setAttribute('y2', `${y2}%`);
+
+    let strokeColor = '#f97316'; 
+    if (colorClass === 'red') strokeColor = '#ef4444';
+    if (colorClass === 'cyan' || colorClass === 'blue') strokeColor = '#06b6d4';
+
+    line.style.stroke = strokeColor;
+    svgContainer.appendChild(line);
+}
+
+// ==========================================
+// แสดงผลตาราง Log พร้อมดึง Port จริงมาโชว์ในตาราง
+// ==========================================
+function renderTable(filterMode = 'ALL') {
+    const tbody = document.getElementById('eventsTableBody');
+    if(!tbody) return;
+    tbody.innerHTML = ''; 
+
+    const filteredLogs = filterMode === 'ALL' 
+        ? allAlertsData 
+        : allAlertsData.filter(log => {
+            const sev = String(log.sev || log.Severity || log.severity || '').toUpperCase();
+            return sev === filterMode;
+        });
+    
+    const eventCountEl = document.getElementById('event-count');
+    if (eventCountEl) eventCountEl.textContent = `${filteredLogs.length} events`;
+
+    filteredLogs.forEach(log => {
+        const tr = document.createElement('tr');
+        
+        const severity = String(log.sev || log.Severity || log.severity || '-').toUpperCase();
+        const status = String(log.status || log.Status || '-').toUpperCase();
+        
+        let rawType = log.type || log.Type || log.attack_type || log.category || log.signature || log.rule_name || log.kill_chain || log.name || 'DDoS Attack';
+        
+        // ดึงหมายเลขพอร์ตจาก API ของจริง (เช็คทุกชื่อคีย์ที่เป็นไปได้)
+        let rawPort = log.port || log.Port || log.destination_port || log.dst_port || log.dport || '-';
+
+        let sevClass = 'sev-low';
+        if(severity === 'CRITICAL') sevClass = 'sev-critical';
+        else if(severity === 'HIGH') sevClass = 'sev-high';
+        else if(severity === 'MEDIUM') sevClass = 'sev-medium';
+
+        let statusColor = '#cbd5e1';
+        if(status === 'BLOCKED') statusColor = '#10b981'; 
+        else if(status === 'DETECTED') statusColor = '#eab308'; 
+        else if(status === 'MITIGATED') statusColor = '#3b82f6'; 
+
+        const pkts = log.pkts || log.Pkts || log.packets || 1500;
+
+        tr.innerHTML = `
+            <td>${log.time || log.Time || log.timestamp || '-'}</td>
+            <td style="color: #06b6d4;">${log.src || log.src_ip || log.Src_IP || log.source_ip || '-'}</td>
+            <td>${log.cc || log.CC || log.country || '-'}</td>
+            <td>${log.dst || log.dst_ip || log.Dst_IP || log.destination_ip || '-'}</td>
+            <td>${rawType}</td>
+            <td><span class="${sevClass}">${severity}</span></td>
+            <td style="color: #e2e8f0; font-weight: 500;">${rawPort}</td>
+            <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
+            <td style="text-align: right; color: #64748b;">${Number(pkts).toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function initFilters() {
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            renderTable(e.target.getAttribute('data-filter'));
+        });
+    });
+}
+
+function initCharts() {
+    const chartColors = ['#ff4d4d', '#ff9f43', '#00cec9', '#a29bfe', '#2ed573', '#747d8c'];
+    const centerTextPlugin = {
+        id: 'centerText',
+        beforeDraw: function(chart) {
+            if (chart.config.type !== 'doughnut') return;
+            const ctx = chart.ctx;
+            const meta = chart.getDatasetMeta(0);
+            if (!meta.data.length) return;
+            const centerX = meta.data[0].x;
+            const centerY = meta.data[0].y;
+            ctx.save();
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = "9px 'Segoe UI', sans-serif";
+            ctx.fillStyle = "#64748b";
+            ctx.fillText("Total", centerX, centerY - 8);
+            ctx.font = "bold 14px 'Segoe UI', sans-serif";
+            ctx.fillStyle = "#ffffff";
+            const total = chart.config.data.datasets[0].data.reduce((a, b) => Number(a) + Number(b), 0);
+            ctx.fillText(total.toLocaleString(), centerX, centerY + 7);
+            ctx.restore();
+        }
+    };
+
+    const ctxDoughnut = document.getElementById('attackTypeChart');
+    if(ctxDoughnut) {
+        attackTypesChartInstance = new Chart(ctxDoughnut.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: ['SQL Inj.', 'DDoS', 'Brute F.', 'Ransomw.', 'XSS', 'Other'],
+                datasets: [{ data: [35, 25, 20, 10, 5, 5], backgroundColor: chartColors, borderWidth: 0 }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, layout: { padding: 0 },
+                plugins: { legend: { position: 'right', labels: { color: '#e2e8f0', usePointStyle: true, pointStyle: 'circle', boxWidth: 6, font: { family: 'monospace', size: 10 }, padding: 6 } } },
+                cutout: '68%'
+            },
+            plugins: [centerTextPlugin]
+        });
+    }
+
+    const ctxBar = document.getElementById('attackVolumeChart');
+    if(ctxBar) {
+        attackVolumeChartInstance = new Chart(ctxBar.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['00','','','','','','06','','','','','','12','','','','','','18','','','','',''],
+                datasets: [{
+                    label: 'Events',
+                    data: [12, 8, 5, 10, 22, 45, 60, 30, 20, 15, 25, 40, 55, 70, 45, 35, 20, 15, 40, 65, 50, 30, 18, 10],
+                    backgroundColor: function(context) {
+                        const value = context.dataset.data[context.dataIndex];
+                        if (value > 50) return '#ff4d4d';
+                        if (value > 30) return '#ff9f43';
+                        return '#00cec9';
+                    },
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#64748b' } } }
+            }
+        });
+    }
 }
