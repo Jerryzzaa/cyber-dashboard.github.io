@@ -27,6 +27,7 @@ const COUNTRY_COORDINATES = {
 document.addEventListener("DOMContentLoaded", () => {
     initCharts();
     initFilters();
+    initRealTimeClock();
     
     fetchDashboardStats();
     fetchRecentAlerts();
@@ -458,4 +459,28 @@ function initCharts() {
             }
         });
     }
+}
+// ฟังก์ชันรันเวลาประเทศไทย (ICT / UTC+7) แบบ Real-time
+function initRealTimeClock() {
+    const clockElement = document.getElementById('live-clock');
+    if (!clockElement) return;
+
+    function updateClock() {
+        const now = new Date();
+        
+        // ใช้ Date.toLocaleTimeString เพื่อแปลงเป็นเวลาของประเทศไทย (Asia/Bangkok) แบบ 24 ชั่วโมง
+        const timeString = now.toLocaleTimeString('en-GB', {
+            timeZone: 'Asia/Bangkok',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+
+        clockElement.textContent = `${timeString} ICT`;
+    }
+
+    // รันทันที 1 รอบ แล้วสั่งให้อัปเดตทุกๆ 1 วินาที
+    updateClock();
+    setInterval(updateClock, 1000);
 }
