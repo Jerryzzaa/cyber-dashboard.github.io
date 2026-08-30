@@ -147,8 +147,10 @@ body {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    padding: 15px;
+    padding: 8px;
     box-sizing: border-box;
+    padding-left: 20px;
+
 }
 
 .card-title {
@@ -194,8 +196,17 @@ body {
     flex-shrink: 0;
 }
 
-.map-card { flex: 2; }
-.chart-card { flex: 1; display: flex; flex-direction: column;}
+.map-card { 
+    flex: 1 1 auto;
+    width: auto;
+}
+.chart-card { 
+    flex: 0 0 210px; 
+    display: flex; 
+    padding: 10px;
+    width: 210px;
+    max-width: 210px;
+    flex-direction: column;}
 
 .map-container {
     position: relative;
@@ -205,24 +216,54 @@ body {
 }
 
 .chart-container { 
-    flex: 1; 
+    flex:0 0 120px; 
     position: relative; 
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 140px !important;
+    height: 110px;
+    width: 100%;
+    margin: auto 0;
 }
 
 .volume-card {
     height: 120px;
     flex-shrink: 0;
+    padding: 17px 20px;
 }
 
 .chart-container-bar { 
     height: 75px !important; 
     position: relative; 
 }
+/* =========================================
+   ย่อขนาดข้อมูลภายในกราฟวงกลม (Donut Chart)
+   ========================================= */
 
+/* ย่อตัวเลขและข้อความตรงกลางวงกลม */
+.chart-container .total-number,
+.chart-container div[style*="font-size"] {
+    font-size: 16px !important; /* ตัวเลขรวม เช่น 510 */
+}
+
+.chart-container .total-label {
+    font-size: 9px !important;  /* คำว่า Total */
+}
+
+/* ย่อรายการ Legend ด้านข้าง (SQL Inj, DDoS ฯลฯ) */
+.chart-card .legend-item,
+.chart-card li {
+    font-size: 10px !important;
+    margin-bottom: 3px !important;
+    gap: 6px !important;
+}
+
+/* ย่อจุดสีหน้า Legend */
+.chart-card .legend-dot,
+.chart-card span[style*="border-radius"] {
+    width: 5px !important;
+    height: 5px !important;
+}
 /* =========================================
    PERFECT GRID TABLE & SCROLLABLE LOGS
    ========================================= */
@@ -287,7 +328,7 @@ body {
 /* กำหนดความกว้างคอลัมน์ด้วย CSS Grid */
 .events-table tr {
     display: grid;
-    grid-template-columns: 80px 100px 40px 110px 1fr 90px 60px 100px 70px;
+    grid-template-columns: 70px 100px 40px 100px 1fr 90px 60px 110px 60px;
     align-items: center;
     padding: 6px 0;
     border-bottom: 1px solid rgba(30, 41, 59, 0.4);
@@ -304,7 +345,7 @@ body {
     font-size: 11px;
     font-weight: 600;
     text-align: left;
-    letter-spacing: -0.7px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
+    letter-spacing: 1px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
 }
 
 .events-table td {
@@ -314,8 +355,14 @@ body {
     padding: 4px 0;
     letter-spacing: -0.7px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
 }
-
-.events-table td:nth-child(2) { color: var(--color-cyan); } /* IP Color */
+.events-table td:nth-child(8) {
+    font-family:'JetBrains Mono', 'Consolas', 'Courier New', monospace; /* เปลี่ยนฟอนต์ตามต้องการ */
+    font-size: 11px !important;                          /* ปรับขนาดตัวอักษร */
+    font-weight: 700 !important;                         /* ปรับความหนาตัวอักษร */
+    letter-spacing: 0.5px !important;                    /* ปรับระยะห่างระหว่างตัวอักษรไม่ให้ซ้อนกัน */
+}
+.events-table td:nth-child(2) { 
+    color: var(--color-cyan); } /* IP Color */
 
 .events-table th:last-child, 
 .events-table td:last-child {
@@ -328,25 +375,45 @@ body {
 
 /* Badge Severities */
 .sev-critical { 
+    letter-spacing: 0.5px;
     color: var(--color-red); 
     border: 1px solid var(--color-red); 
     padding: 2px 6px; border-radius: 4px; 
     font-size: 10px; display: inline-block; text-align: center; }
 .sev-high { 
+    letter-spacing: 0.5px;
     color: var(--color-orange); 
     border: 1px solid var(--color-orange); 
     padding: 2px 6px; border-radius: 4px; 
     font-size: 10px; display: inline-block; text-align: center; }
 .sev-medium { 
+    letter-spacing: 0.5px;
     color: var(--color-yellow); 
     border: 1px solid var(--color-yellow); 
     padding: 2px 6px; border-radius: 4px; 
     font-size: 10px; display: inline-block; text-align: center; }
 .sev-low { 
+    letter-spacing: 0.5px;
     color: var(--color-cyan); 
     border: 1px solid var(--color-cyan); 
     padding: 2px 6px; border-radius: 4px; 
     font-size: 10px; display: inline-block; text-align: center; }
+
+/* ปรับสีแยกรายสถานะ */
+.status-blocked {
+    color: #10b981 !important; /* สีเขียว */
+    letter-spacing: 2px;
+}
+
+.status-detected {
+    color: #eab308 !important; /* สีเหลือง */
+    letter-spacing: 2px;
+}
+
+.status-mitigated {
+    color: #3b82f6 !important; /* สีฟ้า */
+    letter-spacing: 2px;
+}
 
 /* Map Visualization Styles */
 #grid-background {
@@ -439,11 +506,11 @@ body {
     to { stroke-dashoffset: -10; }
 }
 
-.country-row { margin-bottom: 14px; }
+.country-row { margin-bottom: 10px; }
 .country-stats {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 5px;
+    margin-bottom: 3px;
     font-size: 13px;
     font-family: monospace;
 }
@@ -490,6 +557,8 @@ body {
     letter-spacing: 0.8px;
     margin-bottom: 20px;
     line-height: 1.4;
+    font-family: 'Rajdhani', sans-serif; /* เปลี่ยนชื่อฟอนต์ตามต้องการ (เช่น 'Inter', 'JetBrains Mono') */
+    color: #64748b;
 }
 
 /* เลย์เอาต์ตารางแสดง Port 2 คอลัมน์ */
@@ -508,9 +577,8 @@ body {
     justify-content: center;
     gap: 10px;
     color: #cbd5e1;
-    font-size: 13px;
-    font-weight: 500;
-}
+    font-size: 11px;
+    font-weight: 500; }
 
 /* แถบสีทรงแคปซูล (Pill Shape) */
 .port-item span {
