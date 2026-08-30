@@ -125,11 +125,14 @@ body {
 }
 
 .left-panel {
-    flex: 0 0 250px;
+    height: 70px; /* 70px คือความสูง Header */
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 3px;
+    width: 260px;     /* ปรับลด/เพิ่มตัวเลขนี้ (เช่น 240px เพื่อให้แคบลง หรือ 300px เพื่อให้กว้างขึ้น) */
+    min-width: 260px; /* ปรับตัวเลขให้เท่ากับ width ด้านบน */
 }
+
 
 .center-panel {
     flex: 1;
@@ -149,11 +152,24 @@ body {
 }
 
 .card-title {
-    color: var(--text-muted);
-    font-size: 10px;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+    line-height: 1.2;
+}
+.exfiltration-card {
+    background-color: #1e293b;
+    border: 1px solid #1e293b;
+}
+/* บังคับสีพื้นหลังและเส้นขอบของการ์ดทุกใบให้เหมือนกันทั้งหมด */
+.card,
+.right-panel-card,
+.panel {
+    background-color: #0d1527 !important; /* สีพื้นหลังน้ำเงินเข้ม SOC */
+    border: 1px solid #1e293b !important; /* สีเส้นขอบ */
 }
 
 /* KPIs */
@@ -455,4 +471,52 @@ body {
     .app-layout { flex-direction: column; }
     #chatbot-iframe { width: 100%; height: 500px; }
     .events-table tbody { max-height: 400px; }
+}
+/* การ์ด Exfiltration Channels */
+.right-panel-card {
+    background-color: #0b1120; /* สีพื้นหลังการ์ด */
+    border: 1px solid #1e293b;
+    border-radius: 8px;
+    padding: 18px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+}
+
+/* หัวข้อการ์ด */
+.right-panel-card .card-title {
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 20px;
+    line-height: 1.4;
+}
+
+/* เลย์เอาต์ตารางแสดง Port 2 คอลัมน์ */
+.port-legend {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* แต่ละรายการ Port */
+.port-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #cbd5e1;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* แถบสีทรงแคปซูล (Pill Shape) */
+.port-item span {
+    display: inline-block;
+    width: 34px;
+    height: 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
 }
