@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cyberwatch SOC</title>
     <link rel="stylesheet" href="dash.css">
-    <!-- นำเข้า Chart.js สำหรับกราฟคอลัมน์ขวา -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -25,21 +24,21 @@
             </div>
         </header>
 
-        <!-- Left Sidebar (สถิติต่างๆ - โครงสร้างเดิม) -->
+        <!-- Left Sidebar -->
         <aside class="sidebar-left">
             <div class="stat-card panel">
                 <div class="card-title">ATTACKS TODAY</div>
-                <div class="card-value red-text">510</div>
+                <div class="card-value red-text" id="attacks-today">510</div>
                 <div class="card-sub"><span class="trend up">↑ 23%</span> vs yesterday</div>
             </div>
             <div class="stat-card panel">
                 <div class="card-title">BLOCKED</div>
-                <div class="card-value blue-text">372</div>
+                <div class="card-value blue-text" id="blocked-count">372</div>
                 <div class="card-sub">72.9% block rate</div>
             </div>
             <div class="stat-card panel">
                 <div class="card-title">CRITICAL ACTIVE</div>
-                <div class="card-value red-text">5</div>
+                <div class="card-value red-text" id="critical-active">5</div>
                 <div class="card-sub">Immediate action</div>
             </div>
             <div class="stat-card panel">
@@ -63,29 +62,26 @@
         <!-- Main Content -->
         <main class="main-content">
             <div class="top-row">
+                <!-- Global Threat Map (แผนที่โลก) -->
                 <div class="map-container panel">
                     <div class="card-title">GLOBAL THREAT MAP</div>
-                    <div class="mock-map">
-                        <!-- SVG เส้นเชื่อมโยงการโจมตีไปที่ Target -->
+                    <div class="world-map-bg">
                         <svg class="map-lines" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <line x1="10" y1="50" x2="60" y2="60" stroke="#ff9800" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- US to IN -->
-                            <line x1="30" y1="20" x2="60" y2="60" stroke="#ff9800" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- NL/DE to IN -->
-                            <line x1="45" y1="35" x2="60" y2="60" stroke="#00bcd4" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- TR to IN -->
-                            <line x1="65" y1="25" x2="60" y2="60" stroke="#ff9800" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- RU to IN -->
-                            <line x1="85" y1="20" x2="60" y2="60" stroke="#ff4c4c" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- CN to IN -->
-                            <line x1="40" y1="75" x2="60" y2="60" stroke="#ff9800" stroke-width="0.5" stroke-dasharray="1,1" /> <!-- SG to IN -->
+                            <line x1="22" y1="22" x2="58" y2="62" stroke="#ffb142" stroke-width="0.4" stroke-dasharray="1,1" />
+                            <line x1="32" y1="18" x2="58" y2="62" stroke="#ffb142" stroke-width="0.4" stroke-dasharray="1,1" />
+                            <line x1="68" y1="20" x2="58" y2="62" stroke="#ff5252" stroke-width="0.4" stroke-dasharray="1,1" />
+                            <line x1="35" y1="75" x2="58" y2="62" stroke="#ffb142" stroke-width="0.4" stroke-dasharray="1,1" />
                         </svg>
-
-                        <!-- จุด Nodes -->
-                        <div class="map-node target" style="top: 60%; left: 60%;">IN TARGET</div>
-                        <div class="map-node source" style="top: 50%; left: 10%;">US</div>
-                        <div class="map-node source" style="top: 20%; left: 30%;">NL</div>
-                        <div class="map-node blue-node" style="top: 35%; left: 45%;">TR</div>
-                        <div class="map-node source" style="top: 25%; left: 65%;">RU</div>
-                        <div class="map-node red-node" style="top: 20%; left: 85%;">CN</div>
-                        <div class="map-node source" style="top: 75%; left: 40%;">SG</div>
+                        <div class="map-pin target" style="top: 62%; left: 58%;"></div>
+                        <div class="map-pin red" style="top: 20%; left: 68%;"></div>
+                        <div class="map-pin orange" style="top: 22%; left: 22%;"></div>
+                        <div class="map-pin orange" style="top: 18%; left: 32%;"></div>
+                        <div class="map-pin orange" style="top: 75%; left: 35%;"></div>
+                        <div class="map-pin red" style="top: 30%; left: 62%;"></div>
                     </div>
                 </div>
+
+                <!-- Attack Types -->
                 <div class="donut-container panel">
                     <div class="card-title">ATTACK TYPES</div>
                     <div class="donut-content">
@@ -95,7 +91,7 @@
                         <div class="donut-legend">
                             <div><span class="dot" style="background:#ff5252"></span> SQL Injection 28%</div>
                             <div><span class="dot" style="background:#ffb142"></span> DDoS 19%</div>
-                            <div><span class="dot" style="background:#2ed573"></span> Brute foce 17%</div>
+                            <div><span class="dot" style="background:#2ed573"></span> Brute force 17%</div>
                             <div><span class="dot" style="background:#2ed573"></span> XSS 17%</div>
                             <div><span class="dot" style="background:#2ed573"></span> Other 17%</div>
                         </div>
@@ -143,7 +139,7 @@
                             <th>TYPE</th><th>SEV</th><th>PORT</th><th>STATUS</th><th>PKTS</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="log-table-body">
                         <tr>
                             <td>14:32:01</td><td class="blue-text">185.220.101.47</td><td>RU</td><td>10.0.1.15</td>
                             <td>SQL Injection</td><td><span class="badge critical">CRITICAL</span></td><td>3306</td><td class="green-text">BLOCKED</td><td>2,841</td>
@@ -161,16 +157,8 @@
             </div>
         </main>
 
-        <!-- Right Sidebar (เพิ่มกราฟ และแชทบอทแบบใหม่) -->
+        <!-- Right Sidebar (นำ Top Talkers ออก และขยาย AI Analyst) -->
         <aside class="sidebar-right">
-            <!-- Top Talkers -->
-            <div class="panel right-panel-card">
-                <div class="card-title">Top Talkers (Compromised Source IPs)</div>
-                <div class="chart-container">
-                    <canvas id="sourceChart"></canvas>
-                </div>
-            </div>
-
             <!-- Exfiltration Channels -->
             <div class="panel right-panel-card">
                 <div class="card-title">Exfiltration Channels (Destination Ports)</div>
@@ -182,8 +170,8 @@
                 </div>
             </div>
 
-            <!-- AI Analyst -->
-            <div class="panel ai-panel">
+            <!-- AI Analyst (ขยายสูงเต็มพื้นที่) -->
+            <div class="panel ai-panel-expanded">
                 <div class="chat-header">
                     <span class="dot blue"></span> AI ANALYST
                 </div>
