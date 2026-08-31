@@ -1,22 +1,21 @@
 // ==========================================
-// การตั้งค่า API จริง
+// การตั้งค่า API ใหม่ (172.25.100.38)
 // ==========================================
-const STATS_API_URL = "http://172.25.100.10:8000/api/dashboard/stats";
-const ALERTS_API_URL = "http://172.25.100.10:8000/api/alerts/recent";
+const API_BASE = "http://172.25.100.38:8000/api";
 
 let attackTypesChartInstance;
 let attackVolumeChartInstance;
 let allAlertsData = []; 
 
-// ฐานข้อมูลพิกัดประเทศโดยประมาณบนแคนวาสแผนที่ (X%, Y%)
+// ฐานข้อมูลพิกัดประเทศสำหรับปักหมุดแผนที่
 const COUNTRY_COORDINATES = {
     'US': { x: 20, y: 50 }, 'USA': { x: 20, y: 50 }, 'UNITED STATES': { x: 20, y: 50 },
-    'TH': { x: 68, y: 68 }, 'THAILAND': { x: 68, y: 68 }, 'THAILAN': { x: 68, y: 68 },
+    'TH': { x: 68, y: 68 }, 'THAILAND': { x: 68, y: 68 }, 'THAI1': { x: 68, y: 68 },
     'RU': { x: 62, y: 35 }, 'RUSSIA': { x: 62, y: 35 }, 'RESER...': { x: 62, y: 35 }, 'RESERVED': { x: 62, y: 35 },
     'CN': { x: 72, y: 48 }, 'CHINA': { x: 72, y: 48 },
     'SG': { x: 67, y: 72 }, 'SINGAPORE': { x: 67, y: 72 },
     'NL': { x: 38, y: 38 }, 'NETHERLANDS': { x: 38, y: 38 },
-    'DE': { x: 42, y: 40 }, 'GERMANY': { x: 42, y: 40 }, 'GERMAN': { x: 42, y: 40 },
+    'DE': { x: 42, y: 40 }, 'GERMANY': { x: 42, y: 40 },
     'GB': { x: 35, y: 36 }, 'UK': { x: 35, y: 36 },
     'JP': { x: 80, y: 48 }, 'JAPAN': { x: 80, y: 48 },
     'KR': { x: 77, y: 48 }, 'KOREA': { x: 77, y: 48 },
@@ -29,227 +28,207 @@ document.addEventListener("DOMContentLoaded", () => {
     initFilters();
     initRealTimeClock();
     
-    fetchDashboardStats();
-    fetchRecentAlerts();
-
-    // ดึงข้อมูลใหม่ทุกๆ 30 วินาที
-    setInterval(() => {
-        fetchDashboardStats();
-        fetchRecentAlerts();
-    }, 30000); 
+    fetchAllData();
+    setInterval(fetchAllData, 30000); 
 });
 
-// ==========================================
-// 1. ดึงข้อมูลสถิติภาพรวม
-// ==========================================
-async function fetchDashboardStats() {
-    try {
-        const response = await fetch(STATS_API_URL);
-        if (!response.ok) throw new Error("Stats API Error");
-        const rawData = await response.json();
-        const data = rawData.data || rawData.stats || rawData;
-
-        // อัปเดต KPI ด้านซ้าย
-        const kpiValues = document.querySelectorAll('.kpi-value');
-        if (kpiValues.length >= 3) {
-            kpiValues[0].textContent = (data.attacks_today || data.total_attacks || data.attacksToday || 360949).toLocaleString();
-            kpiValues[1].textContent = (data.blocked_count || data.blocked || data.blockedCount || 97734).toLocaleString();
-            kpiValues[2].textContent = (data.critical_active || data.critical || data.criticalActive || 127224).toLocaleString();
-        }
-        const kpiSubs = document.querySelectorAll('.kpi-subtext');
-        if (kpiSubs.length >= 2) {
-            kpiSubs[1].textContent = `${data.block_rate || data.blockRate || 0}% block rate`;
-        }
-
-        if (data.top_countries && data.top_countries.length > 0) {
-            renderTopCountriesAndMap(data.top_countries);
-        }
-
-        const attackVolumes = data.attack_volumes || data.attackVolumes || [];
-        if (attackVolumes.length > 0 && attackVolumeChartInstance) {
-            const values = attackVolumes.map(item => item.count || item.value || item);
-            attackVolumeChartInstance.data.datasets[0].data = values;
-            attackVolumeChartInstance.update();
-        }
-        
-    } catch (error) {
-        console.error("Error fetching stats:", error);
-    }
+function fetchAllData() {
+    fetchStats();
+    fetchTimeline();
+    fetchTopSources();
+    fetchThreatTypes();
+    fetchTopPorts();
+    fetchAlerts();
 }
 
 // ==========================================
-// 2. ดึงข้อมูลตาราง Log
+// 1. API: GET /api/stats
 // ==========================================
-async function fetchRecentAlerts() {
+async function fetchStats() {
     try {
-        const response = await fetch(ALERTS_API_URL);
-        if (!response.ok) throw new Error("Alerts API Error");
+        const response = await fetch(`${API_BASE}/stats`);
+        if (!response.ok) return;
+        const data = await response.json();
+
+        const kpiValues = document.querySelectorAll('.kpi-value');
+        if (kpiValues.length >= 3) {
+            // ดึงยอดรวม Alert: totals.alerts
+            const totalAlerts = data?.totals?.alerts || data?.total || 0;
+            // ดึงยอด Critical Active: incidents.needs_llm
+            const criticalActive = data?.incidents?.needs_llm || data?.needs_llm || 0;
+            // ยอด Blocked (ดึงจาก stats หรือคำนวณจาก alerts)
+            const blockedCount = data?.blocked || data?.totals?.blocked || 0;
+
+            kpiValues[0].textContent = Number(totalAlerts).toLocaleString();
+            kpiValues[1].textContent = Number(blockedCount).toLocaleString();
+            kpiValues[2].textContent = Number(criticalActive).toLocaleString();
+
+            const kpiSubs = document.querySelectorAll('.kpi-subtext');
+            if (kpiSubs.length >= 2 && totalAlerts > 0) {
+                const blockRate = ((blockedCount / totalAlerts) * 100).toFixed(1);
+                kpiSubs[1].textContent = `${blockRate}% block rate`;
+            }
+        }
+    } catch (error) { console.error("Error fetching stats:", error); }
+}
+
+// ==========================================
+// 2. API: GET /api/charts/timeline?bucket=hour&days=1
+// ==========================================
+async function fetchTimeline() {
+    try {
+        const response = await fetch(`${API_BASE}/charts/timeline?bucket=hour&days=1`);
+        if (!response.ok) return;
+        const raw = await response.json();
+        const items = raw.items || [];
         
-        const rawData = await response.json();
-        allAlertsData = Array.isArray(rawData) ? rawData : (rawData.data || rawData.alerts || rawData.results || []);
+        if (items.length > 0 && attackVolumeChartInstance) {
+            const labels = items.map(item => {
+                const timeStr = item.bucket || "";
+                return timeStr.includes(" ") ? timeStr.split(" ")[1].substring(0, 5) : timeStr;
+            });
+            const counts = items.map(item => Number(item.total || 0));
+
+            attackVolumeChartInstance.data.labels = labels;
+            attackVolumeChartInstance.data.datasets[0].data = counts;
+            attackVolumeChartInstance.update();
+        }
+    } catch (error) { console.error("Error fetching timeline:", error); }
+}
+
+// ==========================================
+// 3. API: GET /api/charts/top-sources
+// ==========================================
+async function fetchTopSources() {
+    try {
+        const response = await fetch(`${API_BASE}/charts/top-sources`);
+        if (!response.ok) return;
+        const raw = await response.json();
+        const items = raw.items || [];
+        
+        const countryMap = {};
+        items.forEach(item => {
+            let country = item.country || 'Unknown';
+            let alertsCount = Number(item.alerts || item.count || 1);
+            if (country && country !== '-' && country !== 'Unknown') {
+                countryMap[country] = (countryMap[country] || 0) + alertsCount;
+            }
+        });
+
+        const sortedCountries = Object.keys(countryMap)
+            .map(name => ({ name: name, count: countryMap[name] }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5);
+            
+        renderTopCountriesAndMap(sortedCountries);
+    } catch (error) { console.error("Error fetching top sources:", error); }
+}
+
+// ==========================================
+// 4. API: GET /api/charts/threat-types
+// ==========================================
+async function fetchThreatTypes() {
+    try {
+        const response = await fetch(`${API_BASE}/charts/threat-types`);
+        if (!response.ok) return;
+        const raw = await response.json();
+        const items = raw.items || [];
+        
+        if (items.length > 0 && attackTypesChartInstance) {
+            const labels = items.map(item => item.threat_type || item.type || 'Unknown');
+            const counts = items.map(item => Number(item.count || 0));
+            
+            attackTypesChartInstance.data.labels = labels;
+            attackTypesChartInstance.data.datasets[0].data = counts;
+            attackTypesChartInstance.update();
+        }
+    } catch (error) { console.error("Error fetching threat types:", error); }
+}
+
+// ==========================================
+// 5. API: GET /api/charts/top-ports
+// ==========================================
+async function fetchTopPorts() {
+    try {
+        const response = await fetch(`${API_BASE}/charts/top-ports`);
+        if (!response.ok) return;
+        const raw = await response.json();
+        const items = raw.items || [];
+        
+        const portLegendContainer = document.querySelector('.port-legend');
+        if (!portLegendContainer) return;
+        
+        portLegendContainer.innerHTML = '';
+        const topPorts = items.slice(0, 4);
+
+        if (topPorts.length === 0) {
+            portLegendContainer.innerHTML = '<div style="color: #64748b; font-size: 11px;">No active ports data</div>';
+            return;
+        }
+
+        const portColors = ['#ff9800', '#00bcd4', '#f44336', '#00e676'];
+        topPorts.forEach((item, index) => {
+            const color = portColors[index % portColors.length];
+            const portNum = item.port || '-';
+            const count = Number(item.count || 0);
+            
+            const portItem = document.createElement('div');
+            portItem.className = 'port-item';
+            portItem.style.display = 'flex';
+            portItem.style.alignItems = 'center';
+            portItem.style.gap = '8px';
+            portItem.style.marginBottom = '6px';
+            
+            portItem.innerHTML = `
+                <span style="background: ${color}; width: 28px; height: 8px; border-radius: 4px; display: inline-block; flex-shrink: 0;"></span> 
+                <span style="color: #f8fafc; font-weight: 600; font-size: 11px;">Port ${portNum}</span>
+                <span style="color: #64748b; font-size: 10px; margin-left: auto;">(${count.toLocaleString()} hits)</span>
+            `;
+            portLegendContainer.appendChild(portItem);
+        });
+    } catch (error) { console.error("Error fetching top ports:", error); }
+}
+
+// ==========================================
+// 6. API: GET /api/alerts?limit=12
+// ==========================================
+async function fetchAlerts() {
+    try {
+        const response = await fetch(`${API_BASE}/alerts?limit=50`);
+        if (!response.ok) return;
+        const raw = await response.json();
+        
+        allAlertsData = raw.items || [];
         
         const activeFilterBtn = document.querySelector('.filter-btn.active');
         const currentFilter = activeFilterBtn ? activeFilterBtn.getAttribute('data-filter') : 'ALL';
         
         renderTable(currentFilter);
-        
-        processTopCountriesFromAlerts(allAlertsData);
-        processAttackTypesFromAlerts(allAlertsData);
-        processPortsFromAlerts(allAlertsData);
-
-    } catch (error) {
-        console.error("Error fetching alerts:", error);
-    }
+    } catch (error) { console.error("Error fetching alerts:", error); }
 }
 
-// ==========================================
-// ประมวลผล Attack Types
-// ==========================================
-function processAttackTypesFromAlerts(alerts) {
-    if (!alerts || alerts.length === 0) return;
 
-    const typeCountMap = {};
-
-    alerts.forEach(log => {
-        let rawType = log.type || log.Type || log.attack_type || log.category || log.signature || log.rule_name || log.kill_chain || log.name || 'DDoS Attack';
-        rawType = String(rawType).trim();
-        if (rawType === '-' || rawType === '') rawType = 'DDoS Attack';
-        typeCountMap[rawType] = (typeCountMap[rawType] || 0) + 1;
-    });
-
-    const sortedTypes = Object.keys(typeCountMap)
-        .map(name => ({ name, count: typeCountMap[name] }))
-        .sort((a, b) => b.count - a.count);
-
-    const top5 = sortedTypes.slice(0, 5);
-    const otherCount = sortedTypes.slice(5).reduce((sum, item) => sum + item.count, 0);
-
-    const finalLabels = [];
-    const finalData = [];
-
-    top5.forEach(item => {
-        let shortName = item.name.length > 12 ? item.name.substring(0, 10) + '...' : item.name;
-        finalLabels.push(shortName);
-        finalData.push(item.count);
-    });
-
-    if (otherCount > 0 || finalLabels.length === 0) {
-        finalLabels.push('Other');
-        finalData.push(otherCount || 5);
-    }
-
-    if (attackTypesChartInstance) {
-        attackTypesChartInstance.data.labels = finalLabels;
-        attackTypesChartInstance.data.datasets[0].data = finalData;
-        attackTypesChartInstance.update();
-    }
-}
-
-// ==========================================
-// ประมวลผล Top Countries
-// ==========================================
-function processTopCountriesFromAlerts(alerts) {
-    if (!alerts || alerts.length === 0) return;
-
-    const countryCountMap = {};
-    alerts.forEach(log => {
-        let country = log.cc || log.CC || log.country || log.Country || 'United States';
-        country = String(country).trim();
-        if (country && country !== '-' && country !== 'Unknown') {
-            countryCountMap[country] = (countryCountMap[country] || 0) + 1;
-        }
-    });
-
-    let sortedCountries = Object.keys(countryCountMap)
-        .map(name => ({ name: name, count: countryCountMap[name] }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 5);
-
-    if (sortedCountries.length === 0) {
-        sortedCountries = [
-            { name: 'China', count: 188 },
-            { name: 'Russia', count: 214 },
-            { name: 'Germany', count: 61 },
-            { name: 'United States', count: 84 },
-            { name: 'Netherlands', count: 97 }
-        ];
-    }
-
-    renderTopCountriesAndMap(sortedCountries);
-}
-
-// ==========================================
-// [ดึงข้อมูลจริง] ประมวลผลและแสดงผล Destination Ports
-// ==========================================
-function processPortsFromAlerts(alerts) {
-    const portCountMap = {};
-
-    if (alerts && alerts.length > 0) {
-        alerts.forEach(log => {
-            // ดึงค่าพอร์ตจากทุกชื่อ Key ที่เป็นไปได้จาก Backend
-            let port = log.port || log.Port || log.destination_port || log.dst_port || log.dport || '';
-            port = String(port).trim();
-            if (port && port !== '-' && port !== 'Unknown' && port !== 'undefined' && port !== 'null') {
-                portCountMap[port] = (portCountMap[port] || 0) + 1;
-            }
-        });
-    }
-
-    // เรียงลำดับพอร์ตที่พบมากที่สุด
-    let topPorts = Object.keys(portCountMap)
-        .map(p => ({ port: p, count: portCountMap[p] }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 4); // เอา 4 อันดับแรก
-
-    const portLegendContainer = document.getElementById('portLegendContainer') || document.querySelector('.port-legend');
-    if (!portLegendContainer) return;
-
-    portLegendContainer.innerHTML = '';
-
-    // ถ้าไม่มีข้อมูลพอร์ตใน Log จริงๆ ให้แจ้งเตือน หรือถ้ามีให้นำมาสร้าง Element สดๆ
-    if (topPorts.length === 0) {
-        portLegendContainer.innerHTML = '<div style="color: #64748b; font-size: 11px; padding: 5px;">No active ports found</div>';
-        return;
-    }
-
-    // ชุดสีสำหรับแสดงผลแต่ละพอร์ต
-    const portColors = ['#ff9800', '#00bcd4', '#f44336', '#00e676'];
-
-    topPorts.forEach((item, index) => {
-        const color = portColors[index % portColors.length];
-        const portItem = document.createElement('div');
-        portItem.className = 'port-item';
-        portItem.style.display = 'flex';
-        portItem.style.alignItems = 'center';
-        portItem.style.gap = '8px';
-        portItem.style.marginBottom = '6px';
-        
-        portItem.innerHTML = `
-            <span style="background: ${color}; width: 28px; height: 8px; border-radius: 4px; display: inline-block; flex-shrink: 0;"></span> 
-            <span style="color: #f8fafc; font-weight: 600; font-size: 11px;">Port ${item.port}</span>
-            <span style="color: #64748b; font-size: 10px; margin-left: auto;">(${item.count} hits)</span>
-        `;
-        portLegendContainer.appendChild(portItem);
-    });
-}
+/* =========================================================================
+   การเรนเดอร์หน้าเว็บ (ตาราง, แผนที่, กราฟ, นาฬิกา)
+   ========================================================================= */
 
 function renderTopCountriesAndMap(countriesData) {
     const container = document.getElementById('topCountriesList');
     if (!container) return;
     container.innerHTML = ''; 
 
-    const maxCount = Math.max(...countriesData.map(c => Number(c.count || c.Count || c.value || 0)));
+    const maxCount = Math.max(...countriesData.map(c => Number(c.count || 0)));
 
     countriesData.forEach(item => {
-        const count = Number(item.count || item.Count || item.value || 0);
+        const count = Number(item.count || 0);
         const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
-        const countryName = item.name || item.Name || item.country || 'Unknown';
+        const countryName = item.name || 'Unknown';
 
         const row = document.createElement('div');
         row.className = 'country-row';
         row.innerHTML = `
             <div class="country-stats">
-                <span class="country-name">${item.flag ? item.flag + ' ' : ''}${countryName}</span>
+                <span class="country-name">${countryName}</span>
                 <span class="country-count">${count.toLocaleString()}</span>
             </div>
             <div class="country-bar">
@@ -276,7 +255,7 @@ function updateGlobalThreatMap(topCountries) {
     drawMapNode(nodesContainer, targetNode.name, targetNode.x, targetNode.y, 'cyan', true);
 
     topCountries.forEach((item, index) => {
-        const nameRaw = String(item.name || item.country || '').toUpperCase();
+        const nameRaw = String(item.name || '').toUpperCase();
         
         let coords = COUNTRY_COORDINATES[nameRaw];
         if (!coords) {
@@ -326,9 +305,6 @@ function drawAttackLine(svgContainer, x1, y1, x2, y2, colorClass) {
     svgContainer.appendChild(line);
 }
 
-// ==========================================
-// แสดงผลตาราง Log พร้อมดึง Port จริงมาโชว์ในตาราง
-// ==========================================
 function renderTable(filterMode = 'ALL') {
     const tbody = document.getElementById('eventsTableBody');
     if(!tbody) return;
@@ -337,7 +313,7 @@ function renderTable(filterMode = 'ALL') {
     const filteredLogs = filterMode === 'ALL' 
         ? allAlertsData 
         : allAlertsData.filter(log => {
-            const sev = String(log.sev || log.Severity || log.severity || '').toUpperCase();
+            const sev = String(log.severity || '').toUpperCase();
             return sev === filterMode;
         });
     
@@ -347,34 +323,45 @@ function renderTable(filterMode = 'ALL') {
     filteredLogs.forEach(log => {
         const tr = document.createElement('tr');
         
-        const severity = String(log.sev || log.Severity || log.severity || '-').toUpperCase();
-        const status = String(log.status || log.Status || '-').toUpperCase();
+        let formattedTime = '-';
+        if (log.time) {
+            const dateObj = new Date(log.time);
+            if (!isNaN(dateObj)) {
+                formattedTime = dateObj.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            } else {
+                formattedTime = log.time;
+            }
+        }
+
+        const srcIp = log.src_ip || '-';
+        const country = log.country || '-';
+        const dstIp = log.dst_ip || '-';
+        const type = log.threat_type || '-';
+        const severity = String(log.severity || 'INFO').toUpperCase();
+        const port = log.dst_port || '-';
+        const status = String(log.status || 'DETECTED').toUpperCase();
         
-        let rawType = log.type || log.Type || log.attack_type || log.category || log.signature || log.rule_name || log.kill_chain || log.name || 'DDoS Attack';
-        
-        // ดึงหมายเลขพอร์ตจาก API ของจริง (เช็คทุกชื่อคีย์ที่เป็นไปได้)
-        let rawPort = log.port || log.Port || log.destination_port || log.dst_port || log.dport || '-';
+        const pkts = log.conn_count !== undefined ? log.conn_count : (log.bytes_out !== undefined ? log.bytes_out : 0);
 
         let sevClass = 'sev-low';
         if(severity === 'CRITICAL') sevClass = 'sev-critical';
         else if(severity === 'HIGH') sevClass = 'sev-high';
         else if(severity === 'MEDIUM') sevClass = 'sev-medium';
+        else if(severity === 'INFO') sevClass = 'sev-low';
 
         let statusColor = '#cbd5e1';
         if(status === 'BLOCKED') statusColor = '#10b981'; 
         else if(status === 'DETECTED') statusColor = '#eab308'; 
         else if(status === 'MITIGATED') statusColor = '#3b82f6'; 
 
-        const pkts = log.pkts || log.Pkts || log.packets || 1500;
-
         tr.innerHTML = `
-            <td>${log.time || log.Time || log.timestamp || '-'}</td>
-            <td style="color: #06b6d4;">${log.src || log.src_ip || log.Src_IP || log.source_ip || '-'}</td>
-            <td>${log.cc || log.CC || log.country || '-'}</td>
-            <td>${log.dst || log.dst_ip || log.Dst_IP || log.destination_ip || '-'}</td>
-            <td>${rawType}</td>
+            <td>${formattedTime}</td>
+            <td style="color: #06b6d4;">${srcIp}</td>
+            <td>${country}</td>
+            <td>${dstIp}</td>
+            <td>${type}</td>
             <td><span class="${sevClass}">${severity}</span></td>
-            <td style="color: #e2e8f0; font-weight: 500;">${rawPort}</td>
+            <td style="color: #e2e8f0; font-weight: 500;">${port}</td>
             <td style="color: ${statusColor}; font-weight: bold;">${status}</td>
             <td style="text-align: right; color: #64748b;">${Number(pkts).toLocaleString()}</td>
         `;
@@ -423,8 +410,8 @@ function initCharts() {
         attackTypesChartInstance = new Chart(ctxDoughnut.getContext('2d'), {
             type: 'doughnut',
             data: {
-                labels: ['SQL Inj.', 'DDoS', 'Brute F.', 'Ransomw.', 'XSS', 'Other'],
-                datasets: [{ data: [35, 25, 20, 10, 5, 5], backgroundColor: chartColors, borderWidth: 0 }]
+                labels: ['Loading...'],
+                datasets: [{ data: [1], backgroundColor: chartColors, borderWidth: 0 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false, layout: { padding: 0 },
@@ -440,16 +427,11 @@ function initCharts() {
         attackVolumeChartInstance = new Chart(ctxBar.getContext('2d'), {
             type: 'bar',
             data: {
-                labels: ['00','','','','','','06','','','','','','12','','','','','','18','','','','',''],
+                labels: [],
                 datasets: [{
                     label: 'Events',
-                    data: [12, 8, 5, 10, 22, 45, 60, 30, 20, 15, 25, 40, 55, 70, 45, 35, 20, 15, 40, 65, 50, 30, 18, 10],
-                    backgroundColor: function(context) {
-                        const value = context.dataset.data[context.dataIndex];
-                        if (value > 50) return '#ff4d4d';
-                        if (value > 30) return '#ff9f43';
-                        return '#00cec9';
-                    },
+                    data: [],
+                    backgroundColor: '#00cec9',
                     borderRadius: 4
                 }]
             },
@@ -460,15 +442,13 @@ function initCharts() {
         });
     }
 }
-// ฟังก์ชันรันเวลาประเทศไทย (ICT / UTC+7) แบบ Real-time
+
 function initRealTimeClock() {
     const clockElement = document.getElementById('live-clock');
     if (!clockElement) return;
 
     function updateClock() {
         const now = new Date();
-        
-        // ใช้ Date.toLocaleTimeString เพื่อแปลงเป็นเวลาของประเทศไทย (Asia/Bangkok) แบบ 24 ชั่วโมง
         const timeString = now.toLocaleTimeString('en-GB', {
             timeZone: 'Asia/Bangkok',
             hour12: false,
@@ -476,11 +456,9 @@ function initRealTimeClock() {
             minute: '2-digit',
             second: '2-digit'
         });
-
         clockElement.textContent = `${timeString} ICT`;
     }
 
-    // รันทันที 1 รอบ แล้วสั่งให้อัปเดตทุกๆ 1 วินาที
     updateClock();
     setInterval(updateClock, 1000);
 }
