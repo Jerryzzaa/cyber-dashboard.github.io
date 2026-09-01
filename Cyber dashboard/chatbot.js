@@ -1,4 +1,5 @@
 function initChatbot() {
+    const CHAT_API_URL = "http://172.25.100.10:8000/api/ai/chat";
     const inputField = document.getElementById('aiInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatHistory = document.getElementById('chatHistory');
@@ -13,7 +14,7 @@ function initChatbot() {
         return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    function appendUserMessage(text) {
+    async function appendUserMessage(text) {
         if (!text.trim()) return;
 
         const msgWrapper = document.createElement('div');
@@ -28,12 +29,48 @@ function initChatbot() {
         
         inputField.value = '';
         scrollToBottom();
+        
         showTypingIndicator();
         
-        setTimeout(() => {
+        try {
+            // ส่งไปทั้ง message, prompt, query เผื่อ Backend ใช้ตัวไหนตัวหนึ่ง
+            const response = await fetch(CHAT_API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ 
+                    message: text,
+                    prompt: text,
+                    query: text
+                }) 
+            });
+
+            if (!response.ok) throw new Error("API Error");
+            
+            const rawData = await response.json();
+            console.log("Chat API Response:", rawData); // ดูโครงสร้างแชทใน F12
+
             removeTypingIndicator();
-            appendBotMessage(`รับทราบครับ ระบบกำลังตรวจสอบข้อมูลเกี่ยวกับ: "${text}"`);
-        }, 1500); 
+            
+            // ดักจับคำตอบครอบคลุมทุกรูปแบบ
+            let aiResponseText = rawData.reply || rawData.message || rawData.response || rawData.answer;
+            
+            // ถ้า API ส่งมาเป็น String ตรงๆ โดยไม่มี Key หุ้ม
+            if (!aiResponseText && typeof rawData === 'string') {
+                aiResponseText = rawData;
+            } else if (!aiResponseText) {
+                // ถ้าหา Key ไม่เจอจริงๆ ให้แสดงโครงสร้าง JSON ออกมาให้เราเห็น
+                aiResponseText = JSON.stringify(rawData);
+            }
+
+            appendBotMessage(aiResponseText);
+
+        } catch (error) {
+            console.error("AI Chat Error:", error);
+            removeTypingIndicator();
+            appendBotMessage("⚠️ ไม่สามารถเชื่อมต่อกับระบบ LLM ได้ (กรุณาตรวจสอบ Console F12 หรือสถานะ CORS)");
+        }
     }
 
     function appendBotMessage(text) {
@@ -75,20 +112,14 @@ function initChatbot() {
         }
     }
 
-    sendBtn.addEventListener('click', () => {
-        appendUserMessage(inputField.value);
-    });
-
+    sendBtn.addEventListener('click', () => appendUserMessage(inputField.value));
     inputField.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            appendUserMessage(inputField.value);
-        }
+        if (e.key === 'Enter') appendUserMessage(inputField.value);
     });
 
     tagButtons.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const text = e.target.textContent;
-            inputField.value = text;
+            inputField.value = e.target.textContent;
             inputField.focus(); 
         });
     });

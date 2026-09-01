@@ -20,10 +20,10 @@
                     <span class="dot red-dot"></span> Cyber Attack Dashboard <span class="version">v2.4.1</span>
                 </div>
                 <div class="status-indicators">
-                    <span><span class="dot green-dot"></span> IDS ONLINE</span>
-                    <span><span class="dot green-dot"></span> FIREWALL ACTIVE</span>
-                    <span><span class="dot yellow-dot"></span> THREAT LEVEL: HIGH</span>
-                    <span class="time">07:50:02 UTC</span>
+                 <!--<span><span class="dot green-dot"></span> IDS ONLINE</span>
+                     <span><span class="dot green-dot"></span> FIREWALL ACTIVE</span>
+                     <span><span class="dot yellow-dot"></span> THREAT LEVEL: HIGH</span>-->
+                    <span class="time" id="live-clock">00:00:00 ICT</span>
                 </div>
             </header>
 
@@ -48,11 +48,8 @@
                     <!-- Exfiltration Channels -->
                     <div class="panel right-panel-card">
                         <div class="card-title">Exfiltration Channels (Destination Ports)</div>
-                        <div class="port-legend">
-                    <div class="port-item"><span style="background: #ff9800;"></span> Port 53</div>
-                    <div class="port-item"><span style="background: #00bcd4;"></span> Port 80</div>
-                    <div class="port-item"><span style="background: #f44336;"></span> Port 443</div>
-                    <div class="port-item"><span style="background: #00e676;"></span> Port 8080</div>
+                        <div class="port-legend"> id="portLegengContainer"
+
                 </div>
             </div>
                     <div class="card">
@@ -97,7 +94,7 @@
                             <button class="filter-btn" data-filter="HIGH">HIGH</button>
                             <button class="filter-btn" data-filter="MEDIUM">MEDIUM</button>
                             <button class="filter-btn" data-filter="LOW">LOW</button>
-                            <span id="event-count" style="margin-left: auto; font-size: 10px; color: #64748b;">12 events</span>
+                            <span id="event-count" style="margin-left: auto; font-size: 10px; color: #64748b;">1 events</span>
                         </div>
 
                         <table class="events-table">
