@@ -82,6 +82,8 @@ body {
     align-items: center;
     gap: 8px;
     letter-spacing: 1px;
+    font-size: 14px;      /* <-- เพิ่มบรรทัดนี้ เพื่อขยายขนาด */
+    font-weight: 700;
 }
 
 .version {
@@ -129,7 +131,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 3px;
-    width: 260px;     /* ปรับลด/เพิ่มตัวเลขนี้ (เช่น 240px เพื่อให้แคบลง หรือ 300px เพื่อให้กว้างขึ้น) */
+    width: 260px;    /* ปรับลด/เพิ่มตัวเลขนี้ (เช่น 240px เพื่อให้แคบลง หรือ 300px เพื่อให้กว้างขึ้น) */
     min-width: 260px; /* ปรับตัวเลขให้เท่ากับ width ด้านบน */
 }
 
@@ -325,6 +327,23 @@ body {
     overflow-y: auto;
 }
 
+/* =====================================
+   ตกแต่ง Scrollbar ในตารางให้สวยงาม
+   ===================================== */
+.events-table tbody::-webkit-scrollbar {
+    width: 6px;
+}
+.events-table tbody::-webkit-scrollbar-track {
+    background: transparent;
+}
+.events-table tbody::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+.events-table tbody::-webkit-scrollbar-thumb:hover {
+    background: #06b6d4;
+}
+
 /* กำหนดความกว้างคอลัมน์ด้วย CSS Grid */
 .events-table tr {
     display: grid;
@@ -364,9 +383,13 @@ body {
 .events-table td:nth-child(2) { 
     color: var(--color-cyan); } /* IP Color */
 
+/* =====================================
+   แก้ปัญหาคอลัมน์ PKTS โดน Scrollbar บัง
+   ===================================== */
 .events-table th:last-child, 
 .events-table td:last-child {
     text-align: right;
+    padding-right: 20px !important; /* เว้นที่ว่างด้านขวาหลบ Scrollbar */
 }
 
 .events-table tbody tr:hover {
