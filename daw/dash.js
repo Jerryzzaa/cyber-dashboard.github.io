@@ -1,7 +1,7 @@
 // ==========================================
 // การตั้งค่า API ใหม่ (172.25.100.58)
 // ==========================================
-const API_BASE = "http://172.25.100.58:8000/api";
+const API_BASE = "http://172.25.100.10:8000/api";
 
 let attackTypesChartInstance;
 let attackVolumeChartInstance;

@@ -1,5 +1,5 @@
 function initChatbot() {
-    const CHAT_API_URL = "http://172.25.100.10:8000/api/ai/chat";
+    const CHAT_API_URL = "http://172.25.100.10:8001/api/ai/chat";
     const inputField = document.getElementById('aiInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatHistory = document.getElementById('chatHistory');
@@ -76,9 +76,16 @@ function initChatbot() {
     function appendBotMessage(text) {
         const msgWrapper = document.createElement('div');
         msgWrapper.className = 'message-wrapper bot';
+        
+        // 🌟 แปลงข้อความ Markdown เป็น HTML สวยๆ ด้วย marked.js
+        let formattedHtml = text;
+        if (typeof marked !== 'undefined') {
+            formattedHtml = marked.parse(text, { breaks: true });
+        }
+        
         msgWrapper.innerHTML = `
             <div class="message-content">
-                <div class="message-bubble">${text}</div>
+                <div class="message-bubble">${formattedHtml}</div>
                 <div class="message-time">${getCurrentTime()}</div>
             </div>
         `;
