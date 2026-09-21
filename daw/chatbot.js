@@ -1,5 +1,5 @@
 function initChatbot() {
-    const CHAT_API_URL = "http://172.25.100.10:8001/api/ai/chat";
+    const CHAT_API_URL = "http://172.25.100.6:10000/api/ai/chat";
     const inputField = document.getElementById('aiInput');
     const sendBtn = document.getElementById('sendBtn');
     const chatHistory = document.getElementById('chatHistory');
