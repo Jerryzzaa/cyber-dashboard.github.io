@@ -1,5 +1,5 @@
 // ==========================================
-// การตั้งค่า API ใหม่ (172.25.100.58)
+// การตั้งค่า API
 // ==========================================
 const API_BASE = "http://172.25.100.6:8000/api";
 
@@ -7,26 +7,47 @@ let attackTypesChartInstance;
 let attackVolumeChartInstance;
 let allAlertsData = []; 
 
-// ฐานข้อมูลพิกัดประเทศสำหรับปักหมุดแผนที่
-const COUNTRY_COORDINATES = {
-    'US': { x: 20, y: 50 }, 'USA': { x: 20, y: 50 }, 'UNITED STATES': { x: 20, y: 50 },
-    'TH': { x: 68, y: 68 }, 'THAILAND': { x: 68, y: 68 }, 'THAI1': { x: 68, y: 68 },
-    'RU': { x: 62, y: 35 }, 'RUSSIA': { x: 62, y: 35 }, 'RESER...': { x: 62, y: 35 }, 'RESERVED': { x: 62, y: 35 },
-    'CN': { x: 72, y: 48 }, 'CHINA': { x: 72, y: 48 },
-    'SG': { x: 67, y: 72 }, 'SINGAPORE': { x: 67, y: 72 },
-    'NL': { x: 38, y: 38 }, 'NETHERLANDS': { x: 38, y: 38 },
-    'DE': { x: 42, y: 40 }, 'GERMANY': { x: 42, y: 40 },
-    'GB': { x: 35, y: 36 }, 'UK': { x: 35, y: 36 },
-    'JP': { x: 80, y: 48 }, 'JAPAN': { x: 80, y: 48 },
-    'KR': { x: 77, y: 48 }, 'KOREA': { x: 77, y: 48 },
-    'IN': { x: 60, y: 60 }, 'INDIA': { x: 60, y: 60 },
-    'IR': { x: 52, y: 45 }, 'IRAN': { x: 52, y: 45 }
+// ฐานข้อมูลพิกัด ละติจูด/ลองจิจูด (Lat/Lng) สำหรับลูกโลก 3D
+const COUNTRY_GEO = {
+    'TH': { name: 'Thailand', lat: 13.7563, lng: 100.5018 },
+    'THAILAND': { name: 'Thailand', lat: 13.7563, lng: 100.5018 },
+    'US': { name: 'United States', lat: 37.0902, lng: -95.7129 },
+    'USA': { name: 'United States', lat: 37.0902, lng: -95.7129 },
+    'UNITED STATES': { name: 'United States', lat: 37.0902, lng: -95.7129 },
+    'RU': { name: 'Russia', lat: 61.5240, lng: 105.3188 },
+    'RUSSIA': { name: 'Russia', lat: 61.5240, lng: 105.3188 },
+    'CN': { name: 'China', lat: 35.8617, lng: 104.1954 },
+    'CHINA': { name: 'China', lat: 35.8617, lng: 104.1954 },
+    'FR': { name: 'France', lat: 46.2276, lng: 2.2137 },
+    'FRANCE': { name: 'France', lat: 46.2276, lng: 2.2137 },
+    'DE': { name: 'Germany', lat: 51.1657, lng: 10.4515 },
+    'GERMANY': { name: 'Germany', lat: 51.1657, lng: 10.4515 },
+    'GB': { name: 'United Kingdom', lat: 55.3781, lng: -3.4360 },
+    'UK': { name: 'United Kingdom', lat: 55.3781, lng: -3.4360 },
+    'JP': { name: 'Japan', lat: 36.2048, lng: 138.2529 },
+    'JAPAN': { name: 'Japan', lat: 36.2048, lng: 138.2529 },
+    'SG': { name: 'Singapore', lat: 1.3521, lng: 103.8198 },
+    'SINGAPORE': { name: 'Singapore', lat: 1.3521, lng: 103.8198 },
+    'IN': { name: 'India', lat: 20.5937, lng: 78.9629 },
+    'INDIA': { name: 'India', lat: 20.5937, lng: 78.9629 },
+    'NL': { name: 'Netherlands', lat: 52.1326, lng: 5.2913 },
+    'NETHERLANDS': { name: 'Netherlands', lat: 52.1326, lng: 5.2913 },
+    'RESERVED-DOCUMENTATION': { name: 'Reserved (EU)', lat: 50.1109, lng: 8.6821 }
 };
+
+// พิกัดเป้าหมายหลัก (Thailand Target)
+const TARGET_GEO = { name: 'IN TARGET (TH)', lat: 13.7563, lng: 100.5018 };
+
+let mainGlobe = null;
+let modalGlobe = null;
+let currentArcsData = [];
+let currentLabelsData = [];
 
 document.addEventListener("DOMContentLoaded", () => {
     initCharts();
     initFilters();
     initRealTimeClock();
+    init3DGlobe();
     
     fetchAllData();
     setInterval(fetchAllData, 30000); 
@@ -52,11 +73,8 @@ async function fetchStats() {
 
         const kpiValues = document.querySelectorAll('.kpi-value');
         if (kpiValues.length >= 3) {
-            // ดึงยอดรวม Alert: totals.alerts
             const totalAlerts = data?.totals?.alerts || data?.total || 0;
-            // ดึงยอด Critical Active: incidents.needs_llm
             const criticalActive = data?.incidents?.needs_llm || data?.needs_llm || 0;
-            // ยอด Blocked (ดึงจาก stats หรือคำนวณจาก alerts)
             const blockedCount = data?.blocked || data?.totals?.blocked || 0;
 
             kpiValues[0].textContent = Number(totalAlerts).toLocaleString();
@@ -73,7 +91,7 @@ async function fetchStats() {
 }
 
 // ==========================================
-// 2. API: GET /api/charts/timeline?bucket=hour&days=1
+// 2. API: GET /api/charts/timeline
 // ==========================================
 async function fetchTimeline() {
     try {
@@ -97,7 +115,7 @@ async function fetchTimeline() {
 }
 
 // ==========================================
-// 3. API: GET /api/charts/top-sources
+// 3. API: GET /api/charts/top-sources & 3D Globe Sync
 // ==========================================
 async function fetchTopSources() {
     try {
@@ -120,8 +138,190 @@ async function fetchTopSources() {
             .sort((a, b) => b.count - a.count)
             .slice(0, 5);
             
-        renderTopCountriesAndMap(sortedCountries);
+        renderTopCountries(sortedCountries);
+        update3DGlobeData(sortedCountries);
     } catch (error) { console.error("Error fetching top sources:", error); }
+}
+
+function renderTopCountries(countriesData) {
+    const container = document.getElementById('topCountriesList');
+    if (!container) return;
+    container.innerHTML = ''; 
+
+    const maxCount = Math.max(...countriesData.map(c => Number(c.count || 0)));
+
+    countriesData.forEach(item => {
+        const count = Number(item.count || 0);
+        const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
+        const countryName = item.name || 'Unknown';
+
+        const row = document.createElement('div');
+        row.className = 'country-row';
+        row.innerHTML = `
+            <div class="country-stats">
+                <span class="country-name">${countryName}</span>
+                <span class="country-count">${count.toLocaleString()}</span>
+            </div>
+            <div class="country-bar">
+                <div class="bar-fill" style="width: ${percentage}%;"></div>
+            </div>
+        `;
+        container.appendChild(row);
+    });
+}
+
+// ==========================================
+// 3D Globe Implementation
+// ==========================================
+function init3DGlobe() {
+    const container = document.getElementById('globeContainer');
+    if (!container) return;
+
+    mainGlobe = Globe()(container)
+        .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+        .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+        .backgroundColor('#050811')
+        .showAtmosphere(true)
+        .atmosphereColor('#06b6d4')
+        .atmosphereAltitude(0.15)
+        .arcColor('color')
+        .arcDashLength(0.4)
+        .arcDashGap(0.2)
+        .arcDashAnimateTime(1500)
+        .arcStroke(1.2)
+        .labelLat('lat')
+        .labelLng('lng')
+        .labelText('text')
+        .labelSize('size')
+        .labelColor(() => '#06b6d4')
+        .labelDotRadius(0.5)
+        .labelResolution(2);
+
+    mainGlobe.controls().autoRotate = true;
+    mainGlobe.controls().autoRotateSpeed = 0.8;
+    mainGlobe.pointOfView({ lat: 20, lng: 80, altitude: 2.3 });
+
+    const resizeGlobe = () => {
+        if (mainGlobe && container) {
+            mainGlobe.width(container.clientWidth);
+            mainGlobe.height(container.clientHeight);
+        }
+    };
+    window.addEventListener('resize', resizeGlobe);
+    setTimeout(resizeGlobe, 300);
+
+    const modal = document.getElementById('globeModal');
+    const expandBtn = document.getElementById('expandGlobeBtn');
+    const closeBtn = document.getElementById('closeGlobeModal');
+    const modalContainer = document.getElementById('modalGlobeContainer');
+
+    expandBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+        if (!modalGlobe) {
+            modalGlobe = Globe()(modalContainer)
+                .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+                .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+                .backgroundColor('#000000')
+                .showAtmosphere(true)
+                .atmosphereColor('#06b6d4')
+                .atmosphereAltitude(0.2)
+                .arcColor('color')
+                .arcDashLength(0.4)
+                .arcDashGap(0.2)
+                .arcDashAnimateTime(1200)
+                .arcStroke(1.8)
+                .labelLat('lat')
+                .labelLng('lng')
+                .labelText('text')
+                .labelSize('size')
+                .labelColor(() => '#06b6d4')
+                .labelDotRadius(0.8);
+
+            modalGlobe.controls().autoRotate = true;
+            modalGlobe.controls().autoRotateSpeed = 0.5;
+        }
+
+        modalGlobe.width(modalContainer.clientWidth);
+        modalGlobe.height(modalContainer.clientHeight);
+        modalGlobe.arcsData(currentArcsData);
+        modalGlobe.labelsData(currentLabelsData);
+        modalGlobe.pointOfView({ lat: 20, lng: 80, altitude: 2.0 });
+    });
+
+    closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+    });
+}
+
+// 🌟 ฟังก์ชันอัปเดตข้อมูลลูกโลก แสดงจำนวนการโจมตีของประเทศไทย (TARGET)
+function update3DGlobeData(topCountries) {
+    const arcs = [];
+    const labels = [];
+
+    // 1. ค้นหาจำนวนการโจมตีของประเทศไทยจาก topCountries
+    const thData = topCountries.find(item => {
+        const nameUpper = String(item.name || '').toUpperCase();
+        return nameUpper === 'TH' || nameUpper === 'THAILAND';
+    });
+    const thCount = thData ? Number(thData.count || 0).toLocaleString() : 'Active';
+
+    // 2. ปักป้าย TARGET ประเทศไทย พร้อมแสดงยอดตัวเลข
+    labels.push({
+        lat: TARGET_GEO.lat,
+        lng: TARGET_GEO.lng,
+        text: `TARGET: Thailand (${thCount})`,
+        size: 1.2
+    });
+
+    const fallbackList = [
+        { lat: 48.8566, lng: 2.3522, name: 'France' },
+        { lat: 55.7558, lng: 37.6173, name: 'Russia' },
+        { lat: 37.7749, lng: -122.4194, name: 'USA' },
+        { lat: 35.6762, lng: 139.6503, name: 'Japan' }
+    ];
+
+    topCountries.forEach((item, idx) => {
+        const nameUpper = String(item.name || '').toUpperCase();
+        const isThailand = nameUpper === 'TH' || nameUpper === 'THAILAND';
+
+        let geo = COUNTRY_GEO[nameUpper];
+        if (!geo) {
+            const fb = fallbackList[idx % fallbackList.length];
+            geo = { name: item.name, lat: fb.lat, lng: fb.lng };
+        }
+
+        const arcColor = idx === 0 ? ['#ef4444', '#06b6d4'] : (idx < 3 ? ['#f97316', '#06b6d4'] : ['#eab308', '#06b6d4']);
+
+        arcs.push({
+            startLat: geo.lat,
+            startLng: geo.lng,
+            endLat: TARGET_GEO.lat,
+            endLng: TARGET_GEO.lng,
+            color: arcColor
+        });
+
+        // สร้าง Label สำหรับประเทศต้นทางอื่นๆ
+        if (!isThailand) {
+            labels.push({
+                lat: geo.lat,
+                lng: geo.lng,
+                text: `${geo.name} (${Number(item.count || 0).toLocaleString()})`,
+                size: 1.0
+            });
+        }
+    });
+
+    currentArcsData = arcs;
+    currentLabelsData = labels;
+
+    if (mainGlobe) {
+        mainGlobe.arcsData(arcs);
+        mainGlobe.labelsData(labels);
+    }
+    if (modalGlobe) {
+        modalGlobe.arcsData(arcs);
+        modalGlobe.labelsData(labels);
+    }
 }
 
 // ==========================================
@@ -190,7 +390,7 @@ async function fetchTopPorts() {
 }
 
 // ==========================================
-// 6. API: GET /api/alerts?limit=12
+// 6. API: GET /api/alerts
 // ==========================================
 async function fetchAlerts() {
     try {
@@ -205,104 +405,6 @@ async function fetchAlerts() {
         
         renderTable(currentFilter);
     } catch (error) { console.error("Error fetching alerts:", error); }
-}
-
-
-/* =========================================================================
-   การเรนเดอร์หน้าเว็บ (ตาราง, แผนที่, กราฟ, นาฬิกา)
-   ========================================================================= */
-
-function renderTopCountriesAndMap(countriesData) {
-    const container = document.getElementById('topCountriesList');
-    if (!container) return;
-    container.innerHTML = ''; 
-
-    const maxCount = Math.max(...countriesData.map(c => Number(c.count || 0)));
-
-    countriesData.forEach(item => {
-        const count = Number(item.count || 0);
-        const percentage = maxCount > 0 ? (count / maxCount) * 100 : 0;
-        const countryName = item.name || 'Unknown';
-
-        const row = document.createElement('div');
-        row.className = 'country-row';
-        row.innerHTML = `
-            <div class="country-stats">
-                <span class="country-name">${countryName}</span>
-                <span class="country-count">${count.toLocaleString()}</span>
-            </div>
-            <div class="country-bar">
-                <div class="bar-fill" style="width: ${percentage}%;"></div>
-            </div>
-        `;
-        container.appendChild(row);
-    });
-
-    updateGlobalThreatMap(countriesData);
-}
-
-function updateGlobalThreatMap(topCountries) {
-    const nodesContainer = document.getElementById('nodes-container');
-    const attackLinesSvg = document.getElementById('attack-lines');
-    if (!nodesContainer || !attackLinesSvg) return;
-
-    nodesContainer.innerHTML = '';
-    attackLinesSvg.innerHTML = '';
-
-    const targetNode = { name: 'IN TARGET', x: 55, y: 65, color: 'cyan' };
-    const fallbackCoords = [{ x: 22, y: 55 }, { x: 38, y: 40 }, { x: 62, y: 35 }, { x: 72, y: 48 }, { x: 42, y: 75 }];
-
-    drawMapNode(nodesContainer, targetNode.name, targetNode.x, targetNode.y, 'cyan', true);
-
-    topCountries.forEach((item, index) => {
-        const nameRaw = String(item.name || '').toUpperCase();
-        
-        let coords = COUNTRY_COORDINATES[nameRaw];
-        if (!coords) {
-            const matchedKey = Object.keys(COUNTRY_COORDINATES).find(k => nameRaw.includes(k) || k.includes(nameRaw));
-            coords = matchedKey ? COUNTRY_COORDINATES[matchedKey] : fallbackCoords[index % fallbackCoords.length];
-        }
-
-        const nodeColor = index === 0 ? 'red' : (index < 3 ? 'orange' : 'blue');
-        const shortName = nameRaw.substring(0, 7);
-
-        drawMapNode(nodesContainer, shortName, coords.x, coords.y, nodeColor, false);
-        drawAttackLine(attackLinesSvg, coords.x, coords.y, targetNode.x, targetNode.y, nodeColor);
-    });
-}
-
-function drawMapNode(container, name, x, y, colorClass, isTarget) {
-    const nodeGroup = document.createElement('div');
-    nodeGroup.className = `node-group ${colorClass}`;
-    nodeGroup.style.left = `${x}%`;
-    nodeGroup.style.top = `${y}%`;
-
-    const node = document.createElement('div');
-    node.className = 'node pulse';
-
-    const label = document.createElement('span');
-    label.className = `country-label ${isTarget ? 'target-label' : ''}`;
-    label.textContent = name;
-
-    nodeGroup.appendChild(node);
-    nodeGroup.appendChild(label);
-    container.appendChild(nodeGroup);
-}
-
-function drawAttackLine(svgContainer, x1, y1, x2, y2, colorClass) {
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('class', `attack-line`);
-    line.setAttribute('x1', `${x1}%`);
-    line.setAttribute('y1', `${y1}%`);
-    line.setAttribute('x2', `${x2}%`);
-    line.setAttribute('y2', `${y2}%`);
-
-    let strokeColor = '#f97316'; 
-    if (colorClass === 'red') strokeColor = '#ef4444';
-    if (colorClass === 'cyan' || colorClass === 'blue') strokeColor = '#06b6d4';
-
-    line.style.stroke = strokeColor;
-    svgContainer.appendChild(line);
 }
 
 function renderTable(filterMode = 'ALL') {
@@ -397,7 +499,7 @@ function initCharts() {
             ctx.font = "9px 'Segoe UI', sans-serif";
             ctx.fillStyle = "#64748b";
             ctx.fillText("Total", centerX, centerY - 8);
-            ctx.font = "bold 14px 'Segoe UI', sans-serif";
+            ctx.font = "bold 13px 'Segoe UI', sans-serif";
             ctx.fillStyle = "#ffffff";
             const total = chart.config.data.datasets[0].data.reduce((a, b) => Number(a) + Number(b), 0);
             ctx.fillText(total.toLocaleString(), centerX, centerY + 7);
@@ -414,8 +516,22 @@ function initCharts() {
                 datasets: [{ data: [1], backgroundColor: chartColors, borderWidth: 0 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, layout: { padding: 0 },
-                plugins: { legend: { position: 'right', labels: { color: '#e2e8f0', usePointStyle: true, pointStyle: 'circle', boxWidth: 6, font: { family: 'monospace', size: 10 }, padding: 6 } } },
+                responsive: true, 
+                maintainAspectRatio: false, 
+                layout: { padding: 0 },
+                plugins: { 
+                    legend: { 
+                        position: 'right', 
+                        labels: { 
+                            color: '#e2e8f0', 
+                            usePointStyle: true, 
+                            pointStyle: 'circle', 
+                            boxWidth: 5, 
+                            font: { family: 'monospace', size: 9 }, 
+                            padding: 4 
+                        } 
+                    } 
+                },
                 cutout: '68%'
             },
             plugins: [centerTextPlugin]

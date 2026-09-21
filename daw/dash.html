@@ -6,23 +6,22 @@
     <title>Cyberwatch SOC</title>
     <link rel="stylesheet" href="dash.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Library สำหรับเรนเดอร์ 3D Globe -->
+    <script src="https://unpkg.com/globe.gl"></script>
 </head>
 <body>
     
-    <!-- 1. สร้างกล่องครอบพื้นที่ทั้งหมดเพื่อทำ Flexbox แยกซ้าย-ขวา -->
     <div class="app-layout">
 
-        <!-- 2. กล่องนี้ครอบ Dashboard เดิมของคุณทั้งหมด (ฝั่งซ้าย) -->
+        <!-- Dashboard ฝั่งซ้าย -->
         <div class="main-dashboard">
             
             <header class="header">
                 <div class="logo">
                     <span class="dot red-dot"></span> Cyber Attack Dashboard
-            </div>
+                </div>
                 <div class="status-indicators">
-                 <!--<span><span class="dot green-dot"></span> IDS ONLINE</span>
-                     <span><span class="dot green-dot"></span> FIREWALL ACTIVE</span>
-                     <span><span class="dot yellow-dot"></span> THREAT LEVEL: HIGH</span>-->
                     <span class="time" id="live-clock">00:00:00 ICT</span>
                 </div>
             </header>
@@ -33,44 +32,42 @@
                     <div class="card">
                         <div class="card-title">ATTACKS TODAY</div>
                         <div class="kpi-value red-text">510</div>
-                        <div class="kpi-subtext">↑ 23% vs yesterday</div>
+                        
                     </div>
                     <div class="card">
                         <div class="card-title">BLOCKED</div>
                         <div class="kpi-value blue-text">372</div>
-                        <div class="kpi-subtext">72.9% block rate</div>
+                        
                     </div>
                     <div class="card">
                         <div class="card-title">CRITICAL ACTIVE</div>
                         <div class="kpi-value red-text">5</div>
-                        <div class="kpi-subtext">Immediate action</div>
+                        
                     </div>
                     <!-- Exfiltration Channels -->
                     <div class="panel right-panel-card">
                         <div class="card-title">Exfiltration Channels (Destination Ports)</div>
-                        <div class="port-legend"> id="portLegengContainer"
-
-                </div>
-            </div>
+                        <div class="port-legend" id="portLegengContainer"></div>
+                    </div>
                     <div class="card">
-                    <div class="card-title" style="margin-bottom: 15px; color: #64748b;">TOP SOURCE COUNTRIES</div>
+                        <div class="card-title" style="margin-bottom: 15px; color: #64748b;">TOP SOURCE COUNTRIES</div>
                         <div id="topCountriesList"></div>
                     </div>
                 </div>
 
                 <div class="center-panel">
                     <div class="top-row">
-                        <div class="card map-card">
-                        <div class="card-title">GLOBAL THREAT MAP</div>
-                        <div class="map-container" style="position: relative; width: 100%; height: 250px; overflow: hidden;">
-                            <!-- พื้นหลังตาราง -->
-                            <div id="grid-background"></div>
-                            <!-- เส้นการโจมตีแบบเคลื่อนไหว (SVG) -->
-                            <svg id="attack-lines" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"></svg>
-                            <!-- โหนดประเทศและชื่อ -->
-                            <div id="nodes-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+                        <!-- 🌟 การ์ดลูกโลก 3D (จำกัดขนาดแทนที่กรอบเดิม) -->
+                        <div class="card map-card" style="display: flex; flex-direction: column; overflow: hidden; position: relative;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-shrink: 0;">
+                                <div class="card-title" style="margin: 0;">GLOBAL THREAT GLOBE 3D</div>
+                                <button id="expandGlobeBtn" title="Expand Globe" style="background: rgba(6, 182, 212, 0.1); border: 1px solid var(--color-cyan); color: var(--color-cyan); border-radius: 4px; cursor: pointer; padding: 2px 8px; font-size: 10px;">Fullscreen</button>
+                            </div>
+                            <!-- กล่องครอบลูกโลกให้อยู่ตรงกลาง -->
+                            <div id="globeContainer" style="flex: 1; width: 100%; height: 100%; overflow: hidden; position: relative; border-radius: 4px; background: #050811; display: flex; justify-content: center; align-items: center;"></div>
                         </div>
-                        </div>
+
+                        <!-- 🌟 การ์ด ATTACK TYPES (กลับมาอยู่ทางขวา) -->
                         <div class="card chart-card">
                             <div class="card-title">ATTACK TYPES</div>
                             <div class="chart-container">
@@ -94,39 +91,44 @@
                             <button class="filter-btn" data-filter="HIGH">HIGH</button>
                             <button class="filter-btn" data-filter="MEDIUM">MEDIUM</button>
                             <button class="filter-btn" data-filter="LOW">LOW</button>
-                            <span id="event-count" style="margin-left: auto; font-size: 10px; color: #64748b;">1 events</span>
+                            <span id="event-count" style="margin-left: auto; font-size: 10px; color: #64748b;">0 events</span>
                         </div>
 
                         <table class="events-table">
                             <thead>
                                 <tr>
-                                <th>TIME</th>
-                                <th>SRC IP</th>
-                                <th>CC</th>
-                                <th>DST IP</th>
-                                <th>TYPE</th>
-                                <th>SEV</th>
-                                <th>PORT</th>
-                                <th>STATUS</th>
-                                <th style="text-align: right;">PKTS</th>
+                                    <th>TIME</th>
+                                    <th>SRC IP</th>
+                                    <th>CC</th>
+                                    <th>DST IP</th>
+                                    <th>TYPE</th>
+                                    <th>SEV</th>
+                                    <th>PORT</th>
+                                    <th>STATUS</th>
+                                    <th style="text-align: right;">PKTS</th>
                                 </tr>
                             </thead>
                             <tbody id="eventsTableBody">
-                                <!-- ข้อมูลจะถูกสร้างจาก JS -->
+                                <!-- ข้อมูลจาก JS -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-        </div> <!-- ปิด main-dashboard -->
+        </div>
 
-        <!-- 3. แทรกหน้าต่าง Chatbot ไว้ฝั่งขวาสุด -->
+        <!-- หน้าต่าง Chatbot -->
         <iframe src="chatbot.html" id="chatbot-iframe"></iframe>
 
-    </div> <!-- ปิด app-layout -->
+    </div>
 
-    <!-- สคริปต์ Dashboard เดิมยังคงทำงานได้ปกติ -->
+    <!-- Modal ขยายลูกโลก 3D -->
+    <div id="globeModal" class="globe-modal">
+        <span class="close-modal" id="closeGlobeModal">&times;</span>
+        <div id="modalGlobeContainer"></div>
+    </div>
+
     <script src="dash.js"></script>
 </body>
 </html>
