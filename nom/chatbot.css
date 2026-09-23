@@ -196,74 +196,73 @@ body, html {
 }
 .send-btn:hover { background-color: #22d3ee; }
 
-/* =========================================
-   5. GEMINI STYLE (เฉพาะตอนหน้าว่าง + ขยายเต็มจอ)
-   ========================================= */
+/* ===================================================
+   5. GEMINI STYLE (แก้ไขเรื่องเว้นวรรคและจุดเรียบร้อย)
+   =================================================== */
+
 .ai-sidebar.expanded.is-empty .ai-header {
-    background: transparent;
-    border-bottom: none;
-    padding: 20px 32px;
+    background: transparent !important;
+    border-bottom: none !important;
+    padding: 20px 32px !important;
 }
 
 .ai-sidebar.expanded.is-empty .chat-history {
-    justify-content: center;
-    align-items: center;
-    padding: 0 20px;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 0 20px !important;
 }
 
 .ai-sidebar.expanded.is-empty .message-wrapper.bot {
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 760px;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    max-width: 760px !important;
 }
 
-.ai-sidebar.expanded.is-empty .message-avatar { display: none; }
-.ai-sidebar.expanded.is-empty .message-time { display: none; }
+.ai-sidebar.expanded.is-empty .message-avatar,
+.ai-sidebar.expanded.is-empty .message-time { 
+    display: none !important; 
+}
 
 .ai-sidebar.expanded.is-empty .message-bubble {
-    background-color: transparent;
-    font-size: 26px;
-    font-weight: 500;
-    color: #f8fafc;
-    text-align: center;
-    padding: 0;
-    line-height: 1.4;
+    background-color: transparent !important;
+    font-size: 26px !important;
+    font-weight: 500 !important;
+    color: #f8fafc !important;
+    text-align: center !important;
+    padding: 0 !important;
+    line-height: 1.4 !important;
 }
 
 .ai-sidebar.expanded.is-empty .chat-bottom {
-    background: transparent;
-    border-top: none;
-    width: 100%;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 0 20px 24px 20px;
+    background: transparent !important;
+    border-top: none !important;
+    width: 100% !important;
+    max-width: 760px !important;
+    margin: 0 auto !important;
+    padding: 0 20px 24px 20px !important;
 }
 
 .ai-sidebar.expanded.is-empty .suggestion-tags {
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 16px;
+    justify-content: center !important;
+    gap: 8px !important;
+    margin-bottom: 16px !important;
 }
 
 .ai-sidebar.expanded.is-empty .tag-btn {
-    padding: 7px 14px;
-    font-size: 12px;
-    border-radius: 18px;
+    padding: 7px 14px !important;
+    font-size: 12px !important;
+    border-radius: 18px !important;
 }
 
 .ai-sidebar.expanded.is-empty .input-container {
-    padding: 8px 10px 8px 18px;
-    border-radius: 28px;
+    padding: 8px 10px 8px 18px !important;
+    border-radius: 28px !important;
 }
 
 .ai-sidebar.expanded.is-empty #aiInput {
-    font-size: 15px;
-}
-/* เอาวงกลม ไอคอน Avatar ทั้งหมดออก */
-.header-avatar, 
-.message-avatar {
-    display: none !important;
+    font-size: 15px !important;
 }
 /* =========================================
    TYPING INDICATOR (จุดรอตอบของ Bot)
@@ -297,4 +296,160 @@ body, html {
         transform: scale(1.1);
         opacity: 1;
     }
+}
+
+/* =========================================
+   บังคับจัดข้อความ Welcome อยู่ตรงกลาง 100%
+   ========================================= */
+
+/* 1. ดันพื้นที่แชทตรงกลางให้จัดกึ่งกลางทั้งแนวตั้งและแนวนอน */
+.chat-history {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important; /* กลางแนวตั้ง */
+    align-items: center !important;     /* กลางแนวนอน */
+    flex: 1 !important;
+    width: 100% !important;
+    padding: 0 20px !important;
+    box-sizing: border-box !important;
+}
+
+/* 2. ปลดล็อกข้อความ Bot จากชิดซ้าย (flex-start) ให้มาอยู่ตรงกลาง */
+.message-wrapper,
+.message-wrapper.bot {
+    align-self: center !important; /* แก้จุดชิดซ้าย */
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 760px !important;
+    margin: 0 auto !important;
+}
+
+.message-content {
+    width: 100% !important;
+    align-items: center !important;
+}
+
+/* 3. จัดตัวหนังสือและรูปแบบข้อความ Welcome ให้สไตล์ Gemini */
+.message-bubble {
+    background-color: transparent !important;
+    font-size: 24px !important;
+    font-weight: 500 !important;
+    color: #f8fafc !important;
+    text-align: center !important;
+    line-height: 1.5 !important;
+    padding: 0 !important;
+    width: 100% !important;
+}
+/* ซ่อนวงกลม Avatar ฟ้าตรง Header ซ้ายบน */
+.header-avatar {
+    display: none !important;
+}
+/* ===================================================
+   คืนค่าแชทบอทให้เป็น Chat Bubble สวยงาม (ตามรูปขวา)
+   =================================================== */
+
+/* 1. คืนค่าพื้นที่แชท ให้เรียงข้อความจากบนลงล่างตามปกติ */
+.chat-history {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important; /* เรียงจากบนลงล่าง */
+    align-items: stretch !important;
+    gap: 14px !important;
+    padding: 16px !important;
+    overflow-y: auto !important;
+    flex: 1 !important;
+}
+
+/* 2. จัดกล่องข้อความ Bot (ชิดซ้าย) */
+.message-wrapper,
+.message-wrapper.bot {
+    display: flex !important;
+    align-self: flex-start !important;
+    margin-right: auto !important;
+    margin-left: 0 !important;
+    max-width: 85% !important;
+    width: auto !important;
+}
+
+/* 3. จัดกล่องข้อความ User (ชิดขวา) */
+.message-wrapper.user {
+    display: flex !important;
+    align-self: flex-end !important;
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    flex-direction: row-reverse !important;
+    max-width: 85% !important;
+    width: auto !important;
+}
+
+/* 4. สไตล์กล่องข้อความ Bot (สี่เหลี่ยมโค้งมนสีเทาเข้ม ชิดซ้าย) */
+.message-bubble {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    font-size: 13px !important;
+    font-weight: normal !important;
+    line-height: 1.5 !important;
+    padding: 10px 14px !important;
+    border-radius: 14px !important;
+    text-align: left !important;
+    width: auto !important;
+    display: inline-block !important;
+}
+
+/* 5. สไตล์กล่องข้อความ User (แคปซูลสีฟ้า Cyan ชิดขวา) */
+.message-wrapper.user .message-bubble {
+    background-color: #06b6d4 !important;
+    color: #0b1121 !important;
+    font-weight: 600 !important;
+    border-radius: 14px 14px 2px 14px !important;
+    text-align: left !important;
+}
+
+/* 6. ซ่อนวงกลม Avatar ยักษ์ที่โผล่มาตรงกลาง */
+.message-avatar,
+.header-avatar {
+    display: none !important;
+}
+
+/* 7. จัดการเวลา (Just now) ด้านล่างข้อความ */
+.message-time {
+    font-size: 10px !important;
+    color: #64748b !important;
+    margin-top: 4px !important;
+    display: block !important;
+}
+.message-wrapper.user .message-time {
+    text-align: right !important;
+}
+/* =========================================
+   จัดตำแหน่งข้อความเวลา (Just now) แยกฝั่ง
+   ========================================= */
+
+/* กำหนดโครงสร้างการเรียงเนื้อหาในกล่องข้อความ */
+.message-content {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* 1. ฝั่ง Bot (ชิดซ้าย): ให้เวลาชิดขอบซ้าย */
+.message-wrapper.bot .message-content {
+    align-items: flex-start !important;
+}
+.message-wrapper.bot .message-time {
+    text-align: left !important;
+    align-self: flex-start !important;
+    width: 100% !important;
+    margin-top: 4px !important;
+}
+
+/* 2. ฝั่ง User (ชิดขวา): ให้เวลาชิดขอบขวา */
+.message-wrapper.user .message-content {
+    align-items: flex-end !important;
+}
+.message-wrapper.user .message-time {
+    text-align: right !important;
+    align-self: flex-end !important;
+    width: 100% !important;
+    margin-top: 4px !important;
 }
