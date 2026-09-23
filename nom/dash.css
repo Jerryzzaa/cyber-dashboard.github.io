@@ -11,10 +11,6 @@
     --color-orange: #f97316;
 }
 
-/* =========================================
-   LAYOUT PRINCIPLES (Fixed 100vh No-Scroll)
-   ========================================= */
-
 body {
     margin: 0;
     padding: 0;
@@ -22,7 +18,7 @@ body {
     background-color: var(--bg-main);
     color: var(--text-main);
     height: 100vh;
-    overflow: hidden; /* ล็อคไม่ให้เลื่อนทั้งหน้าเว็บ */
+    overflow: hidden;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 .card-title, .logo, .kpi-value {
@@ -30,7 +26,6 @@ body {
     letter-spacing: 1px;
 }
 
-/* ฟอนต์สำหรับตาราง Log และข้อมูลตัวเลข */
 .events-table, .country-stats {
     font-family: 'JetBrains Mono', monospace;
 }
@@ -61,7 +56,6 @@ body {
     border-left: 1px solid var(--border-color); 
 }
 
-/* Header Styles */
 .header {
     display: flex;
     justify-content: space-between;
@@ -73,7 +67,7 @@ body {
     font-size: 12px;
     font-weight: bold;
     flex-shrink: 0;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
 }
 
 .logo {
@@ -82,14 +76,8 @@ body {
     align-items: center;
     gap: 8px;
     letter-spacing: 1px;
-}
-
-.version {
-    color: var(--text-muted);
-    border: 1px solid var(--border-color);
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-left: 10px;
+    font-size: 14px;
+    font-weight: 700;
 }
 
 .status-indicators {
@@ -106,8 +94,6 @@ body {
     margin-right: 5px;
 }
 .red-dot { background-color: var(--color-red); }
-.green-dot { background-color: var(--color-green); }
-.yellow-dot { background-color: var(--color-yellow); }
 
 .time {
     color: var(--color-cyan);
@@ -116,7 +102,6 @@ body {
     border-radius: 4px;
 }
 
-/* Dashboard Grid Structure */
 .dashboard-grid {
     display: flex;
     flex: 1;
@@ -124,15 +109,79 @@ body {
     overflow: hidden;
 }
 
+/* 🌟 โครงสร้างพาเนลฝั่งซ้าย */
 .left-panel {
-    height: 70px; /* 70px คือความสูง Header */
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    width: 260px;     /* ปรับลด/เพิ่มตัวเลขนี้ (เช่น 240px เพื่อให้แคบลง หรือ 300px เพื่อให้กว้างขึ้น) */
-    min-width: 260px; /* ปรับตัวเลขให้เท่ากับ width ด้านบน */
+    gap: 10px;
+    width: 260px;
+    min-width: 260px;
 }
 
+/* 1. ปรับเพิ่มความสูงของการ์ดตัวเลข 3 กล่องบนเล็กน้อย */
+.left-panel .card:not(:last-child) {
+    flex: 0.95;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 8px 14px;
+}
+
+/* 2. การ์ด EXFILTRATION CHANNELS */
+.left-panel .right-panel-card {
+    flex: 1.4;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px 16px;
+}
+
+/* 3. การ์ด TOP SOURCE COUNTRIES */
+.left-panel .card:last-child {
+    flex: 2.8;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 14px 16px;
+}
+
+#topCountriesList {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex: 1;
+    margin-top: 8px;
+}
+
+.country-row {
+    margin-bottom: 0px;
+}
+
+.country-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 12px;
+    font-family: monospace;
+}
+
+.country-name { color: #f8fafc; }
+.country-count { color: #ff4d4d; font-weight: bold; }
+
+.country-bar {
+    height: 4px;
+    background-color: #1e293b;
+    width: 100%;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background-color: #ff4d4d;
+    transition: width 0.4s ease;
+}
 
 .center-panel {
     flex: 1;
@@ -142,7 +191,6 @@ body {
     overflow: hidden;
 }
 
-/* Card General Style */
 .card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -150,7 +198,6 @@ body {
     padding: 8px;
     box-sizing: border-box;
     padding-left: 20px;
-
 }
 
 .card-title {
@@ -159,69 +206,59 @@ body {
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.8px;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
     line-height: 1.2;
 }
-.exfiltration-card {
-    background-color: #1e293b;
-    border: 1px solid #1e293b;
-}
-/* บังคับสีพื้นหลังและเส้นขอบของการ์ดทุกใบให้เหมือนกันทั้งหมด */
-.card,
-.right-panel-card,
-.panel {
-    background-color: #0d1527 !important; /* สีพื้นหลังน้ำเงินเข้ม SOC */
-    border: 1px solid #1e293b !important; /* สีเส้นขอบ */
+
+.card, .right-panel-card, .panel {
+    background-color: #0d1527 !important;
+    border: 1px solid #1e293b !important;
 }
 
-/* KPIs */
+/* 🌟 ปรับขนาดตัวเลข KPI ให้ใหญ่ขึ้นเด่นชัด (28px) */
 .kpi-value {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: bold;
-    margin-bottom: 5px;
+    margin-bottom: 2px;
+    line-height: 1.1;
 }
+
 .kpi-subtext {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-muted);
 }
 .red-text { color: var(--color-red); }
 .blue-text { color: var(--color-cyan); }
-.green-text { color: var(--color-green); }
 
-/* Top Cards Layout */
 .top-row {
     display: flex;
     gap: 15px;
     height: 200px;
     flex-shrink: 0;
-}
-
-.map-card { 
-    flex: 1 1 auto;
-    width: auto;
-}
-.chart-card { 
-    flex: 0 0 210px; 
-    display: flex; 
-    padding: 10px;
-    width: 210px;
-    max-width: 210px;
-    flex-direction: column;}
-
-.map-container {
-    position: relative;
-    width: 100%;
-    height: 150px !important;
     overflow: hidden;
 }
 
+.map-card { 
+    flex: 1;
+    min-width: 0; 
+}
+
+.chart-card { 
+    flex: 0 0 260px; 
+    display: flex; 
+    padding: 10px 12px;
+    width: 260px;
+    max-width: 260px;
+    flex-direction: column;
+}
+
 .chart-container { 
-    flex:0 0 120px; 
+    flex: 1; 
     position: relative; 
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 110px;
+    height: 150px;
     width: 100%;
     margin: auto 0;
 }
@@ -236,43 +273,12 @@ body {
     height: 75px !important; 
     position: relative; 
 }
-/* =========================================
-   ย่อขนาดข้อมูลภายในกราฟวงกลม (Donut Chart)
-   ========================================= */
-
-/* ย่อตัวเลขและข้อความตรงกลางวงกลม */
-.chart-container .total-number,
-.chart-container div[style*="font-size"] {
-    font-size: 16px !important; /* ตัวเลขรวม เช่น 510 */
-}
-
-.chart-container .total-label {
-    font-size: 9px !important;  /* คำว่า Total */
-}
-
-/* ย่อรายการ Legend ด้านข้าง (SQL Inj, DDoS ฯลฯ) */
-.chart-card .legend-item,
-.chart-card li {
-    font-size: 10px !important;
-    margin-bottom: 3px !important;
-    gap: 6px !important;
-}
-
-/* ย่อจุดสีหน้า Legend */
-.chart-card .legend-dot,
-.chart-card span[style*="border-radius"] {
-    width: 5px !important;
-    height: 5px !important;
-}
-/* =========================================
-   PERFECT GRID TABLE & SCROLLABLE LOGS
-   ========================================= */
 
 .table-card { 
     flex: 1; 
     display: flex;
     flex-direction: column;
-    min-height: 0; /* ป้องกันไม่ให้การ์ดดันล้นจอ */
+    min-height: 0;
     overflow: hidden;
 }
 
@@ -283,7 +289,7 @@ body {
     font-size: 10px;
     color: var(--text-muted);
     align-items: center;
-    flex-shrink: 0; /* ล็อค Filter นิ่งอยู่กับที่ */
+    flex-shrink: 0;
 }
 
 .table-header-filters button {
@@ -301,7 +307,6 @@ body {
     color: var(--color-cyan);
 }
 
-/* โครงสร้างตารางหลักใช้ CSS Grid เพื่อความตรงเป๊ะของคอลัมน์ */
 .events-table {
     display: flex;
     flex-direction: column;
@@ -313,19 +318,27 @@ body {
     border-collapse: collapse;
 }
 
-.events-table thead, 
-.events-table tbody {
+.events-table thead, .events-table tbody {
     display: block;
     width: 100%;
 }
 
-/* สกอร์บาร์จะเกิดเฉพาะส่วนข้อมูล Log ด้านล่าง */
 .events-table tbody {
     flex: 1;
     overflow-y: auto;
 }
 
-/* กำหนดความกว้างคอลัมน์ด้วย CSS Grid */
+.events-table tbody::-webkit-scrollbar {
+    width: 6px;
+}
+.events-table tbody::-webkit-scrollbar-track {
+    background: transparent;
+}
+.events-table tbody::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+
 .events-table tr {
     display: grid;
     grid-template-columns: 70px 100px 40px 100px 1fr 90px 60px 110px 60px;
@@ -336,7 +349,7 @@ body {
 
 .events-table thead tr {
     border-bottom: 1px solid var(--border-color);
-    background-color: transparent; /* ลบแถบสีเทาออก */
+    background-color: transparent;
     padding-bottom: 8px;
 }
 
@@ -345,7 +358,7 @@ body {
     font-size: 11px;
     font-weight: 600;
     text-align: left;
-    letter-spacing: 1px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
+    letter-spacing: 1px;
 }
 
 .events-table td {
@@ -353,238 +366,51 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 4px 0;
-    letter-spacing: -0.7px; /* ปรับค่าติดลบเพิ่มขึ้นถ้าต้องการให้ชิดกันอีก เช่น -0.5px */
+    letter-spacing: -0.7px;
 }
-.events-table td:nth-child(8) {
-    font-family:'JetBrains Mono', 'Consolas', 'Courier New', monospace; /* เปลี่ยนฟอนต์ตามต้องการ */
-    font-size: 11px !important;                          /* ปรับขนาดตัวอักษร */
-    font-weight: 700 !important;                         /* ปรับความหนาตัวอักษร */
-    letter-spacing: 0.5px !important;                    /* ปรับระยะห่างระหว่างตัวอักษรไม่ให้ซ้อนกัน */
-}
-.events-table td:nth-child(2) { 
-    color: var(--color-cyan); } /* IP Color */
 
-.events-table th:last-child, 
-.events-table td:last-child {
+.events-table th:last-child, .events-table td:last-child {
     text-align: right;
+    padding-right: 20px !important;
 }
 
 .events-table tbody tr:hover {
     background-color: rgba(30, 41, 59, 0.3);
 }
 
-/* Badge Severities */
-.sev-critical { 
-    letter-spacing: 0.5px;
-    color: var(--color-red); 
-    border: 1px solid var(--color-red); 
-    padding: 2px 6px; border-radius: 4px; 
-    font-size: 10px; display: inline-block; text-align: center; }
-.sev-high { 
-    letter-spacing: 0.5px;
-    color: var(--color-orange); 
-    border: 1px solid var(--color-orange); 
-    padding: 2px 6px; border-radius: 4px; 
-    font-size: 10px; display: inline-block; text-align: center; }
-.sev-medium { 
-    letter-spacing: 0.5px;
-    color: var(--color-yellow); 
-    border: 1px solid var(--color-yellow); 
-    padding: 2px 6px; border-radius: 4px; 
-    font-size: 10px; display: inline-block; text-align: center; }
-.sev-low { 
-    letter-spacing: 0.5px;
-    color: var(--color-cyan); 
-    border: 1px solid var(--color-cyan); 
-    padding: 2px 6px; border-radius: 4px; 
-    font-size: 10px; display: inline-block; text-align: center; }
+.sev-critical { color: var(--color-red); border: 1px solid var(--color-red); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.sev-high { color: var(--color-orange); border: 1px solid var(--color-orange); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.sev-medium { color: var(--color-yellow); border: 1px solid var(--color-yellow); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.sev-low { color: var(--color-cyan); border: 1px solid var(--color-cyan); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
 
-/* ปรับสีแยกรายสถานะ */
-.status-blocked {
-    color: #10b981 !important; /* สีเขียว */
-    letter-spacing: 2px;
+.right-panel-card { background-color: #0b1120; border: 1px solid #1e293b; border-radius: 8px; padding: 18px; }
+.port-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+
+.globe-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(5, 8, 17, 0.95);
+    backdrop-filter: blur(8px);
 }
 
-.status-detected {
-    color: #eab308 !important; /* สีเหลือง */
-    letter-spacing: 2px;
+#modalGlobeContainer {
+    width: 100vw;
+    height: 100vh;
 }
 
-.status-mitigated {
-    color: #3b82f6 !important; /* สีฟ้า */
-    letter-spacing: 2px;
-}
-
-/* Map Visualization Styles */
-#grid-background {
+.close-modal {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background-image: 
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    background-position: center;
-}
-
-#nodes-container {
-    position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
-}
-
-.node-group {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    cursor: pointer;
-}
-
-.node {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    position: relative;
-}
-
-.node::before {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background-color: inherit;
-}
-
-.pulse::after {
-    content: '';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4); }
-    70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
-}
-
-.country-label {
-    margin-top: 5px;
-    font-size: 10px;
-    color: var(--text-muted);
-}
-
-.target-label {
+    top: 20px;
+    right: 30px;
+    color: #06b6d4;
+    font-size: 36px;
     font-weight: bold;
-    font-size: 12px;
-    color: var(--color-cyan);
+    cursor: pointer;
+    z-index: 10000;
 }
-
-.orange .node::before { background-color: var(--color-orange); }
-.blue .node::before { background-color: var(--color-cyan); }
-.red .node::before { background-color: var(--color-red); }
-.cyan .node::before { background-color: var(--color-cyan); }
-
-#attack-lines {
-    position: absolute;
-    top: 0; left: 0;
-    pointer-events: none;
-}
-
-.attack-line {
-    fill: none;
-    stroke-width: 1;
-    stroke-dasharray: 5, 5;
-    animation: attackFlow 1s linear infinite;
-}
-
-@keyframes attackFlow {
-    to { stroke-dashoffset: -10; }
-}
-
-.country-row { margin-bottom: 10px; }
-.country-stats {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 3px;
-    font-size: 13px;
-    font-family: monospace;
-}
-.country-name { color: #f8fafc; }
-.country-count { color: #ff4d4d; font-weight: bold; }
-.country-bar {
-    height: 3px;
-    background-color: #1e293b;
-    width: 100%;
-    border-radius: 2px;
-    overflow: hidden;
-}
-.bar-fill {
-    height: 100%;
-    background-color: #ff4d4d;
-    transition: width 0.4s ease;
-}
-
-/* Responsive Rules for Small Screens */
-@media (max-width: 1024px) {
-    body, .app-layout, .main-dashboard {
-        height: auto;
-        overflow-y: auto;
-    }
-    .app-layout { flex-direction: column; }
-    #chatbot-iframe { width: 100%; height: 500px; }
-    .events-table tbody { max-height: 400px; }
-}
-/* การ์ด Exfiltration Channels */
-.right-panel-card {
-    background-color: #0b1120; /* สีพื้นหลังการ์ด */
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    padding: 18px;
-    font-family: 'Fira Code', 'Courier New', monospace;
-}
-
-/* หัวข้อการ์ด */
-.right-panel-card .card-title {
-    color: #94a3b8;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    margin-bottom: 20px;
-    line-height: 1.4;
-    font-family: 'Rajdhani', sans-serif; /* เปลี่ยนชื่อฟอนต์ตามต้องการ (เช่น 'Inter', 'JetBrains Mono') */
-    color: #64748b;
-}
-
-/* เลย์เอาต์ตารางแสดง Port 2 คอลัมน์ */
-.port-legend {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px 20px;
-    justify-content: center;
-    align-items: center;
-}
-
-/* แต่ละรายการ Port */
-.port-item {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    color: #cbd5e1;
-    font-size: 11px;
-    font-weight: 500; }
-
-/* แถบสีทรงแคปซูล (Pill Shape) */
-.port-item span {
-    display: inline-block;
-    width: 34px;
-    height: 8px;
-    border-radius: 10px;
-    flex-shrink: 0;
-}
+.close-modal:hover { color: #ffffff; }
