@@ -1,0 +1,440 @@
+* { 
+    box-sizing: border-box; 
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: #0b1121;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    overflow: hidden;
+}
+
+/* =========================================
+   1. MAIN CONTAINER
+   ========================================= */
+.ai-sidebar {
+    width: 100%;
+    height: 100vh;
+    background-color: #0b1121;
+    border-left: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* =========================================
+   2. HEADER
+   ========================================= */
+.ai-header {
+    padding: 14px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #1e293b;
+    background-color: #0f172a;
+    z-index: 10;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.header-profile { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+}
+
+.header-avatar {
+    display: none;
+}
+
+.header-info { 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.bot-name { 
+    color: #f8fafc; 
+    font-weight: 600; 
+    font-size: 14px; 
+}
+
+.bot-status { 
+    color: #94a3b8; 
+    font-size: 11px; 
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    margin-top: 2px; 
+}
+
+.status-dot { 
+    width: 7px; 
+    height: 7px; 
+    background-color: #10b981; 
+    border-radius: 50%; 
+}
+
+.header-actions { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+}
+
+.header-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.header-btn:hover { 
+    color: #f8fafc; 
+    background-color: #1e293b; 
+}
+
+.close-icon { 
+    color: #64748b; 
+    cursor: pointer; 
+    font-size: 16px; 
+    font-weight: bold; 
+    line-height: 1; 
+    margin-left: 4px; 
+}
+
+.close-icon:hover { 
+    color: #f8fafc; 
+}
+
+/* =========================================
+   3. CHAT HISTORY & CUSTOM SCROLLBAR
+   ========================================= */
+.chat-history {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+/* 🌟 ปรับแต่งแถบเลื่อนของ AI Analyst ให้สวยงามและโค้งมนสไตล์เดียวกับ Logs */
+.chat-history::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.chat-history::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 4px;
+}
+
+.chat-history::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.chat-history::-webkit-scrollbar-thumb:hover {
+    background: #06b6d4;
+}
+
+.message-wrapper { 
+    display: flex; 
+    gap: 10px; 
+    max-width: 85%; 
+    width: auto;
+}
+
+.message-wrapper.bot { 
+    align-self: flex-start; 
+    margin-right: auto;
+    margin-left: 0;
+}
+
+.message-wrapper.user { 
+    align-self: flex-end; 
+    flex-direction: row-reverse; 
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.message-avatar {
+    display: none;
+}
+
+.message-content { 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.message-wrapper.bot .message-content { 
+    align-items: flex-start; 
+}
+
+.message-wrapper.user .message-content { 
+    align-items: flex-end; 
+}
+
+.message-bubble {
+    padding: 10px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    border-radius: 14px;
+    background-color: #1e293b;
+    color: #f8fafc;
+    word-wrap: break-word;
+    display: inline-block;
+    text-align: left;
+}
+
+.message-bubble p { margin: 0 0 8px 0; }
+.message-bubble p:last-child { margin-bottom: 0; }
+.message-bubble code { background: #0f172a; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+.message-bubble ul, .message-bubble ol { margin: 4px 0; padding-left: 20px; }
+
+.message-wrapper.user .message-bubble {
+    background-color: #06b6d4;
+    color: #0b1121;
+    font-weight: 600;
+    border-radius: 14px 14px 2px 14px;
+}
+
+.message-time { 
+    font-size: 10px; 
+    color: #64748b; 
+    margin-top: 4px; 
+    display: block;
+    width: 100%;
+}
+
+.message-wrapper.bot .message-time { text-align: left; }
+.message-wrapper.user .message-time { text-align: right; }
+
+/* =========================================
+   4. CHAT INPUT AREA
+   ========================================= */
+.chat-bottom {
+    padding: 12px 16px 16px 16px;
+    background-color: #0b1121;
+    border-top: 1px solid #1e293b;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+.suggestion-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+.suggestion-tags::-webkit-scrollbar { display: none; }
+
+.tag-btn {
+    background: #1e293b;
+    border: 1px solid #334155;
+    color: #cbd5e1;
+    padding: 9px 18px;
+    border-radius: 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+.tag-btn:hover { background-color: #334155; color: #f8fafc; }
+
+.input-container {
+    display: flex;
+    align-items: center;
+    background-color: #1e293b;
+    border-radius: 20px;
+    padding: 4px 6px 4px 14px;
+    border: 1px solid #334155;
+}
+.input-container:focus-within { border-color: #06b6d4; }
+
+#aiInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #f8fafc;
+    font-size: 13px;
+    outline: none;
+    padding: 6px 0;
+}
+#aiInput::placeholder { color: #64748b; }
+
+.send-btn {
+    background-color: #06b6d4;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #0b1121;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: 0.2s;
+}
+.send-btn:hover { background-color: #22d3ee; }
+
+/* =========================================
+   6. TYPING INDICATOR
+   ========================================= */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 6px;
+}
+
+.typing-indicator span {
+    width: 6px;
+    height: 6px;
+    background-color: #94a3b8;
+    border-radius: 50%;
+    display: inline-block;
+    animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0s; }
+
+@keyframes typingBounce {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1.1); opacity: 1; }
+}
+
+/* =========================================
+   7. RESPONSIVE DESIGN
+   ========================================= */
+@media (max-height: 850px), (max-width: 1440px) {
+    .ai-header { padding: 8px 14px; }
+    .bot-name { font-size: 13px; }
+    .chat-history { padding: 10px; gap: 10px; }
+    .message-bubble { font-size: 12px; padding: 8px 12px; }
+    .chat-bottom { padding: 8px 12px 12px 12px; }
+    .tag-btn { font-size: 13px; padding: 4px 10px; }
+    .input-container { padding: 2px 4px 2px 12px; }
+    #aiInput { font-size: 12px; }
+    .send-btn { width: 28px; height: 28px; }
+}
+
+.header-btn.report-btn {
+    border: 1px solid #0c8298;
+    color: #06b6d4;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 6px 8px;
+}
+
+.header-btn.report-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.download-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: 1px solid #2dd7a9;
+    border-radius: 6px;
+    color: #42e8bc;
+    text-decoration: none;
+}
+
+.download-link:hover {
+    text-decoration: underline;
+}
+
+.ai-sidebar .suggestion-tags {
+    gap: 8px;
+    padding-bottom: 4px;
+}
+.ai-sidebar .suggestion-tags .tag-btn {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 7px 12px;
+    border: 1px solid #2d3b50;
+    border-radius: 10px;
+    background: #141e2e;
+    color: #cbd5e1;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    transition: background-color .15s, border-color .15s, color .15s;
+}
+.ai-sidebar .suggestion-tags .tag-btn:hover {
+    background: #1c293b;
+    border-color: #506178;
+    color: #f1f5f9;
+}
+.ai-sidebar .header-btn.report-btn,
+.ai-sidebar .download-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 7px 12px;
+    box-sizing: border-box;
+    border: 1px solid #285347;
+    border-radius: 10px;
+    background: #142e28;
+    color: #a7f3d0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background-color .15s, border-color .15s;
+}
+.ai-sidebar .header-btn.report-btn::before,
+.ai-sidebar .download-link::before {
+    content: "";
+    display: block;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M12 3v12m-5-5 5 5 5-5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M12 3v12m-5-5 5 5 5-5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.ai-sidebar .header-btn.report-btn:hover:not(:disabled),
+.ai-sidebar .download-link:hover {
+    background: #1c3e34;
+    border-color: #3b8066;
+    color: #d1fae5;
+    text-decoration: none;
+}
+.ai-sidebar .header-btn.report-btn:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+.ai-sidebar .download-link {
+    margin-top: 10px;
+    min-height: 38px;
+    padding: 9px 14px;
+    max-width: 100%;
+    white-space: normal;
+}

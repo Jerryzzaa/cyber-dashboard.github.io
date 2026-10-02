@@ -1,0 +1,541 @@
+:root {
+    --bg-main: #090e17;
+    --bg-card: #0d1527;
+    --border-color: #1e293b;
+    --text-main: #e2e8f0;
+    --text-muted: #64748b;
+    --color-cyan: #06b6d4;
+    --color-red: #ef4444;
+    --color-green: #10b981;
+    --color-yellow: #eab308;
+    --color-orange: #f97316;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.card-title, .logo, .kpi-value {
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 1px;
+}
+
+.events-table, .country-stats {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.app-layout {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    background-color: #0b1121; 
+    overflow: hidden;
+}
+
+.main-dashboard {
+    flex: 1; 
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 15px;
+    box-sizing: border-box;
+}
+
+/* =========================================
+   1. CHATBOT IFRAME
+   ========================================= */
+#chatbot-iframe {
+    width: 22vw;
+    min-width: 280px;
+    max-width: 340px;
+    height: 100vh;
+    border: none;
+    border-left: 1px solid var(--border-color); 
+}
+
+/* =========================================
+   2. HEADER
+   ========================================= */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: bold;
+    flex-shrink: 0;
+    margin-bottom: 12px;
+}
+
+.logo {
+    color: var(--color-cyan);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 1px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.status-indicators {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    color: var(--text-muted);
+}
+
+.latest-data-day {
+    color: #8498b5;
+    font-size: 11px;
+    font-weight: normal;
+}
+
+.dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+.red-dot { background-color: var(--color-red); }
+
+.time {
+    color: var(--color-cyan);
+    border: 1px solid var(--color-cyan);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.dashboard-grid {
+    display: flex;
+    flex: 1;
+    gap: 15px;
+    overflow: hidden;
+}
+
+/* =========================================
+   3. LEFT PANEL
+   ========================================= */
+.left-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 18vw;
+    min-width: 210px;
+    max-width: 260px;
+}
+
+.left-panel .kpi-value {
+    font-size: 25px;
+}
+
+.left-panel .card:not(:last-child) {
+    flex: 0 0 auto;
+    display: flex;
+    font-size: 20px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 12px 10px;
+}
+
+.left-panel .right-panel-card {
+    flex: 1.2;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 14px 14px;
+}
+
+.left-panel .card:last-child {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 14px 14px;
+}
+
+.left-panel .card:nth-child(4) {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    text-align: left;
+    padding: 14px 16px;
+}
+
+#topCountriesList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+#topCountriesList::-webkit-scrollbar {
+    width: 4px;
+}
+#topCountriesList::-webkit-scrollbar-track {
+    background: transparent;
+}
+#topCountriesList::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 4px;
+}
+#topCountriesList::-webkit-scrollbar-thumb:hover {
+    background: var(--color-cyan);
+}
+
+.country-row { margin-bottom: 0px; }
+.country-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+.country-name { color: #f8fafc; }
+.country-count { color: #ff4d4d; font-weight: bold; }
+.country-bar {
+    height: 4px;
+    background-color: #1e293b;
+    width: 100%;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background-color: #ff4d4d;
+    transition: width 0.4s ease;
+}
+
+/* =========================================
+   4. CENTER PANEL & CARDS
+   ========================================= */
+.center-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow: hidden;
+}
+
+.card, .right-panel-card, .panel {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 8px 8px 20px;
+    box-sizing: border-box;
+}
+
+.card-title {
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 3px;
+    line-height: 1.2;
+}
+
+.kpi-value {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 2px;
+    line-height: 1.1;
+}
+
+.kpi-subtext {
+    font-size: 10px;
+    color: #8498b5;
+    margin-top: 4px;
+}
+
+.red-text { color: var(--color-red); }
+.blue-text { color: var(--color-cyan); }
+
+.top-row {
+    display: flex;
+    gap: 15px;
+    height: 22vh;
+    min-height: 160px;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.map-card { 
+    flex: 0 1 55%;
+    min-width: 0; 
+}
+
+.chart-card { 
+    flex: 0 1 45%; 
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 14px;
+    box-sizing: border-box;
+}
+
+.chart-container { 
+    flex: 1;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+.chart-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* 🌟 ขยายความสูงของการ์ด ATTACK VOLUME ให้กว้างและโปร่งขึ้น */
+.volume-card {
+    height: 18vh;
+    min-height: 120px;
+    flex-shrink: 0;
+    padding: 14px 20px;
+}
+
+.chart-container-bar { 
+    height: 100% !important; 
+    position: relative; 
+}
+
+/* =========================================
+   5. TABLE & CUSTOM SCROLLBAR
+   ========================================= */
+.table-card { 
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.table-header-filters {
+    display: flex;
+    gap: 7px;
+    margin-bottom: 12px;
+    font-size: 10px;
+    color: var(--text-muted);
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.table-header-filters button {
+    background: transparent;
+    border: 1px solid #37506e;
+    color: #bdd0e8;
+    padding: 3px 11px;
+    font-size: 10px;
+    border-radius: 16px;
+    cursor: pointer;
+}
+
+.table-header-filters button.active,
+.table-header-filters button:hover {
+    border-color: var(--color-cyan);
+    color: var(--color-cyan);
+}
+
+#event-count {
+    white-space: nowrap;
+}
+
+.table-scroll {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+}
+
+.table-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.4);
+    border-radius: 4px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+.table-scroll::-webkit-scrollbar-thumb:hover {
+    background: var(--color-cyan);
+}
+
+.events-table {
+    display: table;
+    width: 100%;
+    min-width: 1100px;
+    overflow: visible;
+    border-collapse: collapse;
+    font-size: 11px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.events-table thead {
+    display: table-header-group;
+}
+
+.events-table tbody {
+    display: table-row-group;
+}
+
+.events-table tr {
+    display: table-row;
+}
+
+.events-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: var(--bg-card);
+    padding: 8px 9px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 10px;
+    font-weight: 600;
+    text-align: left;
+    letter-spacing: 0.4px;
+    color: var(--text-muted);
+}
+
+.events-table td {
+    padding: 9px;
+    border-bottom: 1px solid rgba(30, 41, 59, 0.4);
+}
+
+.events-table th:last-child,
+.events-table td:last-child {
+    text-align: left;
+    padding-right: 9px;
+}
+
+.events-table td:nth-child(2) {
+    color: var(--color-cyan);
+    font-weight: 700;
+}
+
+.events-table tbody tr:hover {
+    background-color: rgba(30, 41, 59, 0.3);
+}
+
+.sev-critical { color: var(--color-red); border: 1px solid var(--color-red); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.sev-high { color: var(--color-orange); border: 1px solid var(--color-orange); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.sev-medium { color: var(--color-yellow); border: 1px solid var(--color-yellow); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+.sev-low { color: var(--color-cyan); border: 1px solid var(--color-cyan); padding: 2px 6px; border-radius: 4px; font-size: 10px; }
+
+/* =========================================
+   6. PORT LEGEND
+   ========================================= */
+.port-legend { 
+    display: grid; 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 12px 10px;
+    margin-top: 10px;
+}
+
+.port-item {
+    display: grid;
+    grid-template-columns: 8px 1fr;
+    gap: 2px 8px;
+    align-items: center;
+}
+
+.port-swatch {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.port-label {
+    grid-column: 2;
+    color: #e2e8f0;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.port-count {
+    grid-column: 2;
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+/* =========================================
+   7. GLOBE MODAL
+   ========================================= */
+.globe-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(5, 8, 17, 0.95);
+    backdrop-filter: blur(8px);
+}
+
+#modalGlobeContainer {
+    width: 100vw;
+    height: 100vh;
+}
+
+.close-modal {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    color: #06b6d4;
+    font-size: 36px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+}
+.close-modal:hover { color: #ffffff; }
+
+/* =========================================
+   8. RESPONSIVE DESIGN
+   ========================================= */
+@media (max-width: 1440px), (max-height: 900px) {
+    .main-dashboard {
+        padding: 10px;
+    }
+    .card-title {
+        font-size: 10px;
+    }
+    .kpi-value {
+        font-size: 22px;
+    }
+    .events-table {
+        font-size: 11px;
+    }
+    .header {
+        padding: 6px 14px;
+        margin-bottom: 8px;
+    }
+}
