@@ -1,7 +1,7 @@
+ /* // ==========================================
+// การตั้งค่า API (อัปเดตเป็น IP/Port ใหม่)
 // ==========================================
-// การตั้งค่า API
-// ==========================================
-const API_BASE = "http://172.25.100.6:8000/api";
+const API_BASE = "http://172.24.5.36:8001/api";
 
 let attackTypesChartInstance;
 let attackVolumeChartInstance;
@@ -215,57 +215,59 @@ function init3DGlobe() {
     const closeBtn = document.getElementById('closeGlobeModal');
     const modalContainer = document.getElementById('modalGlobeContainer');
 
-    expandBtn.addEventListener('click', () => {
-        modal.style.display = 'block';
-        if (!modalGlobe) {
-            modalGlobe = Globe()(modalContainer)
-                .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-                .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-                .backgroundColor('#000000')
-                .showAtmosphere(true)
-                .atmosphereColor('#06b6d4')
-                .atmosphereAltitude(0.2)
-                .arcColor('color')
-                .arcDashLength(0.4)
-                .arcDashGap(0.2)
-                .arcDashAnimateTime(1200)
-                .arcStroke(1.8)
-                .labelLat('lat')
-                .labelLng('lng')
-                .labelText('text')
-                .labelSize('size')
-                .labelColor(() => '#06b6d4')
-                .labelDotRadius(0.8);
+    if (expandBtn) {
+        expandBtn.addEventListener('click', () => {
+            modal.style.display = 'block';
+            if (!modalGlobe) {
+                modalGlobe = Globe()(modalContainer)
+                    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+                    .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+                    .backgroundColor('#000000')
+                    .showAtmosphere(true)
+                    .atmosphereColor('#06b6d4')
+                    .atmosphereAltitude(0.2)
+                    .arcColor('color')
+                    .arcDashLength(0.4)
+                    .arcDashGap(0.2)
+                    .arcDashAnimateTime(1200)
+                    .arcStroke(1.8)
+                    .labelLat('lat')
+                    .labelLng('lng')
+                    .labelText('text')
+                    .labelSize('size')
+                    .labelColor(() => '#06b6d4')
+                    .labelDotRadius(0.8);
 
-            modalGlobe.controls().autoRotate = true;
-            modalGlobe.controls().autoRotateSpeed = 0.5;
-        }
+                modalGlobe.controls().autoRotate = true;
+                modalGlobe.controls().autoRotateSpeed = 0.5;
+            }
 
-        modalGlobe.width(modalContainer.clientWidth);
-        modalGlobe.height(modalContainer.clientHeight);
-        modalGlobe.arcsData(currentArcsData);
-        modalGlobe.labelsData(currentLabelsData);
-        modalGlobe.pointOfView({ lat: 20, lng: 80, altitude: 2.0 });
-    });
+            modalGlobe.width(modalContainer.clientWidth);
+            modalGlobe.height(modalContainer.clientHeight);
+            modalGlobe.arcsData(currentArcsData);
+            modalGlobe.labelsData(currentLabelsData);
+            modalGlobe.pointOfView({ lat: 20, lng: 80, altitude: 2.0 });
+        });
+    }
 
-    closeBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+    }
 }
 
-// 🌟 ฟังก์ชันอัปเดตข้อมูลลูกโลก แสดงจำนวนการโจมตีของประเทศไทย (TARGET)
+// 🌟 ฟังก์ชันอัปเดตข้อมูลลูกโลก
 function update3DGlobeData(topCountries) {
     const arcs = [];
     const labels = [];
 
-    // 1. ค้นหาจำนวนการโจมตีของประเทศไทยจาก topCountries
     const thData = topCountries.find(item => {
         const nameUpper = String(item.name || '').toUpperCase();
         return nameUpper === 'TH' || nameUpper === 'THAILAND';
     });
     const thCount = thData ? Number(thData.count || 0).toLocaleString() : 'Active';
 
-    // 2. ปักป้าย TARGET ประเทศไทย พร้อมแสดงยอดตัวเลข
     labels.push({
         lat: TARGET_GEO.lat,
         lng: TARGET_GEO.lng,
@@ -300,7 +302,6 @@ function update3DGlobeData(topCountries) {
             color: arcColor
         });
 
-        // สร้าง Label สำหรับประเทศต้นทางอื่นๆ
         if (!isThailand) {
             labels.push({
                 lat: geo.lat,
@@ -578,6 +579,10 @@ function initRealTimeClock() {
     updateClock();
     setInterval(updateClock, 1000);
 }
+
+// =========================================================
+// 7. Chatbot Logic & API Communication
+// =========================================================
 document.addEventListener("DOMContentLoaded", () => {
     const aiSidebar = document.querySelector('.ai-sidebar');
     const expandBtn = document.getElementById('expandBtn');
@@ -589,18 +594,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const isInIframe = (window.self !== window.top);
 
-    // =========================================================
-    // 1. ระบบจัดการประวัติแชท (sessionStorage)
-    // =========================================================
-
     function loadChatHistory() {
         const savedChat = sessionStorage.getItem('chatHistoryData');
         if (savedChat) {
             const messages = JSON.parse(savedChat);
             if (messages.length > 0) {
-                aiSidebar.classList.remove('is-empty');
+                if (aiSidebar) aiSidebar.classList.remove('is-empty');
                 chatHistory.innerHTML = ''; 
-                
                 messages.forEach(msg => {
                     renderMessage(msg.text, msg.sender, msg.time, false);
                 });
@@ -616,20 +616,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function clearChatHistory() {
         sessionStorage.removeItem('chatHistoryData');
-        aiSidebar.classList.add('is-empty');
-        chatHistory.innerHTML = `
-            <div class="message-wrapper bot">
-                <div class="message-content">
-                    <div class="message-bubble">
-                        พร้อมใช้งาน — พิมพ์ help เพื่อดูคำสั่ง หรือถามเกี่ยวกับ threat ที่กำลังเกิดขึ้นได้เลยครับ
+        if (aiSidebar) aiSidebar.classList.add('is-empty');
+        if (chatHistory) {
+            chatHistory.innerHTML = `
+                <div class="message-wrapper bot">
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            พร้อมใช้งาน — พิมพ์ help เพื่อดูคำสั่ง หรือถามเกี่ยวกับ threat ที่กำลังเกิดขึ้นได้เลยครับ
+                        </div>
+                        <div class="message-time">Just now</div>
                     </div>
-                    <div class="message-time">Just now</div>
                 </div>
-            </div>
-        `;
+            `;
+        }
     }
 
-    // ฟังก์ชันแสดงจุดรอ (...)
     function showTypingIndicator() {
         const typingWrapper = document.createElement('div');
         typingWrapper.className = 'message-wrapper bot typing-wrapper';
@@ -650,6 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function renderMessage(text, sender, time = 'Just now', shouldSave = true) {
+        if (!chatHistory) return;
         const msgWrapper = document.createElement('div');
         msgWrapper.className = `message-wrapper ${sender}`;
 
@@ -680,10 +682,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadChatHistory();
 
-    // =========================================================
-    // 2. ปุ่มควบคุม
-    // =========================================================
-
     if (newChatBtn) {
         newChatBtn.addEventListener('click', () => {
             if (confirm("ต้องการเริ่มแชทใหม่ใช่หรือไม่? ประวัติการสนทนาปัจจุบันจะถูกลบ")) {
@@ -702,53 +700,56 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // =========================================================
-    // 3. ฟังก์ชันการส่งข้อความ
-    // =========================================================
-    function sendMessage(text) {
-        const msgText = text || aiInput.value.trim();
+    // ฟังก์ชันส่งข้อความไปยัง Backend API จริง
+    async function sendMessage(text) {
+        const msgText = text || (aiInput ? aiInput.value.trim() : '');
         if (!msgText) return;
 
         if (msgText.toLowerCase() === 'clear') {
             clearChatHistory();
-            aiInput.value = '';
+            if (aiInput) aiInput.value = '';
             return;
         }
 
-        aiSidebar.classList.remove('is-empty');
+        if (aiSidebar) aiSidebar.classList.remove('is-empty');
         
         // 1. แสดงข้อความผู้ใช้
         renderMessage(msgText, 'user');
-        aiInput.value = '';
+        if (aiInput) aiInput.value = '';
 
-        // 2. แสดงจุดดุ๊กดิ๊กรอคำตอบอย่างเดียว (...)
+        // 2. แสดงสถานะกำลังพิมพ์ (...)
         const typingEl = showTypingIndicator();
 
-        // 3. รอประมวลผลคำตอบจริง (จำลองเวลารอ หรือใส่การดึง API ตรงนี้)
-        setTimeout(() => {
-            // ลบจุดดุ๊กดิ๊กออกทันทีที่ได้คำตอบ
+        try {
+            // 3. ยิง API ขอคำตอบจาก Chatbot Backend
+            // หมายเหตุ: ปรับเปลี่ยน Endpoint (/chat) หรือ JSON Structure ให้ตรงตามที่ระบุใน /docs
+            const response = await fetch(`${API_BASE}/chat`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: msgText })
+            });
+
             if (typingEl) typingEl.remove();
 
-            // 🌟 คำตอบจริงที่จะแสดงทันทีหลังจุดหายไป (ปรับเปลี่ยนเนื้อหาคำตอบตรงนี้ได้ตามต้องการ)
-            let botReply = "";
-            const lowerText = msgText.toLowerCase();
-
-            if (lowerText.includes("critical")) {
-                botReply = "ตรวจพบภัยคุกคามระดับ **Critical Active** ทั้งหมด 15 รายการ โดยมี Port 443 และ 53 เป็นเป้าหมายหลักของการโจมตีครับ";
-            } else if (lowerText.includes("help")) {
-                botReply = "คุณสามารถสอบถามข้อมูลได้ดังนี้:\n- พิมพ์ **critical** เพื่อดูภัยคุกคามร้ายแรง\n- พิมพ์ **top sources** เพื่อดูประเทศต้นทาง\n- พิมพ์ **status** เพื่อดูสถานะระบบ";
+            if (response.ok) {
+                const data = await response.json();
+                // รองรับโครงสร้าง Response ที่ส่งกลับมาจาก API เช่น data.reply, data.response หรือ data.message
+                const botReply = data.reply || data.response || data.message || "ประมวลผลสำเร็จ";
+                renderMessage(botReply, 'bot');
             } else {
-                botReply = `วิเคราะห์ข้อมูลสำหรับ **"${msgText}"** เรียบร้อยแล้ว ไม่พบความผิดปกติเพิ่มเติมครับ`;
+                renderMessage("⚠️ เกิดข้อผิดพลาดจากเซิร์ฟเวอร์ ไม่สามารถดึงคำตอบได้", 'bot');
             }
-
-            // แสดงคำตอบจริงและเซฟลงความจำ
-            renderMessage(botReply, 'bot');
-
-        }, 1200); // ตั้งเวลาค้างจุดดุ๊กดิ๊กไว้ 1.2 วินาที
+        } catch (error) {
+            console.error("Error communicating with Chatbot API:", error);
+            if (typingEl) typingEl.remove();
+            renderMessage("⚠️ ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ API ได้", 'bot');
+        }
     }
 
     function escapeHtml(str) {
-        return str.replace(/[&<>"']/g, match => ({
+        return String(str).replace(/[&<>"']/g, match => ({
             '&': '&amp;',
             '<': '&lt;',
             '>': '&gt;',
@@ -766,4 +767,4 @@ document.addEventListener("DOMContentLoaded", () => {
     tagBtns.forEach(btn => {
         btn.onclick = () => sendMessage(btn.textContent);
     });
-});
+}); */
