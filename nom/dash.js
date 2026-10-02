@@ -1,8 +1,7 @@
-
+/* // ==========================================
+// การตั้งค่า API (อัปเดตเป็น IP/Port ใหม่)
 // ==========================================
-// การตั้งค่า API
-// ==========================================
-const API_BASE = "http://172.25.100.6:8000/api";
+const API_BASE = "http://172.24.5.36:8000/api";
 
 let attackTypesChartInstance;
 let attackVolumeChartInstance;
@@ -61,7 +60,109 @@ function fetchAllData() {
     fetchThreatTypes();
     fetchTopPorts();
     fetchAlerts();
-}
+} 
+
+// Smart SIEM V2 browser adapter 
+(function (global) {
+  "use strict";
+
+  const config = global.SMART_SIEM_CONFIG || {};
+  const VM_VPN_HOST = String(config.VM_VPN_HOST || global.VM_VPN_HOST || "172.24.5.36").trim();
+  const NODE2_API_BASE = String(config.NODE2_API_BASE || `http://${VM_VPN_HOST}:8000/api`).replace(/\/+$/, "");
+  const NODE3_AI_BASE = String(config.NODE3_AI_BASE || `http://${VM_VPN_HOST}:8001/api/ai`).replace(/\/+$/, "");
+  let overviewPromise = null;
+
+  function requireConfiguration() {
+    if (NODE3_AI_BASE.includes("<VM_VPN_HOST>")) {
+      throw new Error("Set SMART_SIEM_CONFIG.VM_VPN_HOST before loading ui_api_adapter.js");
+    }
+  }
+
+  async function requestJson(base, path, options) {
+    requireConfiguration();
+    const response = await global.fetch(base + path, {
+      credentials: "omit",
+      ...options,
+    });
+    if (!response.ok) {
+      throw new Error(`Smart SIEM API returned HTTP ${response.status}`);
+    }
+    try {
+      return await response.json();
+    } catch (_) {
+      throw new Error("Smart SIEM API returned invalid JSON");
+    }
+  }
+
+  function fetchDashboardOverview(refresh = false) {
+    if (refresh || !overviewPromise) {
+      overviewPromise = requestJson(NODE2_API_BASE, "/ui/overview?scope=all_model_output")
+        .catch((error) => { overviewPromise = null; throw error; });
+    }
+    return overviewPromise;
+  }
+
+  async function fetchTimeline() {
+    const overview = await fetchDashboardOverview();
+    return overview.timeline_24h || []; 
+  }
+
+  function fetchThreatTypes() {
+    return requestJson(NODE2_API_BASE, "/charts/threat-types?scope=all_model_output");
+  }
+
+  function fetchTopPorts() {
+    return requestJson(NODE2_API_BASE, "/charts/top-ports?scope=all_model_output");
+  }
+
+  function fetchGeography() {
+    return requestJson(NODE2_API_BASE, "/charts/geography?scope=all_model_output");
+  }
+
+  async function fetchRecentEvents() {
+    const overview = await fetchDashboardOverview();
+    return overview.recent_events || []; 
+  }
+
+  function postNode3(path, body) {
+    return requestJson(NODE3_AI_BASE, path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  }
+
+  function askAI(message) {
+    return postNode3("/chat", { message, audience: "auto", scope: "all_model_output" });
+  }
+
+  function createExecutiveReport(message, title) {
+    return postNode3("/reports", { message, audience: "auto", scope: "all_model_output", title });
+  }
+
+  function reportPath(reportId) {
+    if (typeof reportId !== "string" || !/^[A-Za-z0-9_-]{1,128}$/.test(reportId)) {
+      throw new Error("Invalid report ID");
+    }
+    return "/reports/" + encodeURIComponent(reportId);
+  }
+
+  function getReportStatus(reportId) {
+    return requestJson(NODE3_AI_BASE, reportPath(reportId));
+  }
+
+  function getReportDownloadUrl(reportId) {
+    requireConfiguration();
+    return NODE3_AI_BASE + reportPath(reportId) + "/download";
+  }
+
+  global.SmartSiemAPI = Object.freeze({
+    NODE2_API_BASE, NODE3_AI_BASE,
+    fetchDashboardOverview, fetchTimeline, fetchThreatTypes, fetchTopPorts,
+    fetchGeography, fetchRecentEvents, askAI, createExecutiveReport,
+    getReportStatus, getReportDownloadUrl,
+  });
+})(window);
 
 // ==========================================
 // 1. API: GET /api/stats
@@ -216,57 +317,60 @@ function init3DGlobe() {
     const closeBtn = document.getElementById('closeGlobeModal');
     const modalContainer = document.getElementById('modalGlobeContainer');
 
-    expandBtn.addEventListener('click', () => {
-        modal.style.display = 'block';
-        if (!modalGlobe) {
-            modalGlobe = Globe()(modalContainer)
-                .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
-                .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-                .backgroundColor('#000000')
-                .showAtmosphere(true)
-                .atmosphereColor('#06b6d4')
-                .atmosphereAltitude(0.2)
-                .arcColor('color')
-                .arcDashLength(0.4)
-                .arcDashGap(0.2)
-                .arcDashAnimateTime(1200)
-                .arcStroke(1.8)
-                .labelLat('lat')
-                .labelLng('lng')
-                .labelText('text')
-                .labelSize('size')
-                .labelColor(() => '#06b6d4')
-                .labelDotRadius(0.8);
+    if (expandBtn) {
+        expandBtn.addEventListener('click', () => {
+            if (modal) modal.style.display = 'block';
+            if (!modalGlobe && modalContainer) {
+                modalGlobe = Globe()(modalContainer)
+                    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+                    .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+                    .backgroundColor('#000000')
+                    .showAtmosphere(true)
+                    .atmosphereColor('#06b6d4')
+                    .atmosphereAltitude(0.2)
+                    .arcColor('color')
+                    .arcDashLength(0.4)
+                    .arcDashGap(0.2)
+                    .arcDashAnimateTime(1200)
+                    .arcStroke(1.8)
+                    .labelLat('lat')
+                    .labelLng('lng')
+                    .labelText('text')
+                    .labelSize('size')
+                    .labelColor(() => '#06b6d4')
+                    .labelDotRadius(0.8);
 
-            modalGlobe.controls().autoRotate = true;
-            modalGlobe.controls().autoRotateSpeed = 0.5;
-        }
+                modalGlobe.controls().autoRotate = true;
+                modalGlobe.controls().autoRotateSpeed = 0.5;
+            }
 
-        modalGlobe.width(modalContainer.clientWidth);
-        modalGlobe.height(modalContainer.clientHeight);
-        modalGlobe.arcsData(currentArcsData);
-        modalGlobe.labelsData(currentLabelsData);
-        modalGlobe.pointOfView({ lat: 20, lng: 80, altitude: 2.0 });
-    });
+            if (modalGlobe && modalContainer) {
+                modalGlobe.width(modalContainer.clientWidth);
+                modalGlobe.height(modalContainer.clientHeight);
+                modalGlobe.arcsData(currentArcsData);
+                modalGlobe.labelsData(currentLabelsData);
+                modalGlobe.pointOfView({ lat: 20, lng: 80, altitude: 2.0 });
+            }
+        });
+    }
 
-    closeBtn.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            if (modal) modal.style.display = 'none';
+        });
+    }
 }
 
-// 🌟 ฟังก์ชันอัปเดตข้อมูลลูกโลก แสดงจำนวนการโจมตีของประเทศไทย (TARGET)
 function update3DGlobeData(topCountries) {
     const arcs = [];
     const labels = [];
 
-    // 1. ค้นหาจำนวนการโจมตีของประเทศไทยจาก topCountries
     const thData = topCountries.find(item => {
         const nameUpper = String(item.name || '').toUpperCase();
         return nameUpper === 'TH' || nameUpper === 'THAILAND';
     });
     const thCount = thData ? Number(thData.count || 0).toLocaleString() : 'Active';
 
-    // 2. ปักป้าย TARGET ประเทศไทย พร้อมแสดงยอดตัวเลข
     labels.push({
         lat: TARGET_GEO.lat,
         lng: TARGET_GEO.lng,
@@ -301,7 +405,6 @@ function update3DGlobeData(topCountries) {
             color: arcColor
         });
 
-        // สร้าง Label สำหรับประเทศต้นทางอื่นๆ
         if (!isThailand) {
             labels.push({
                 lat: geo.lat,
@@ -578,4 +681,4 @@ function initRealTimeClock() {
 
     updateClock();
     setInterval(updateClock, 1000);
-}
+} */
