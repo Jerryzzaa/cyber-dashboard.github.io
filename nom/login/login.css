@@ -1,0 +1,441 @@
+/* ==========================================
+   RESET & BASE STYLES
+   ========================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent; /* ยกเลิกแถบไฮไลต์สีเทาเวลากดบนมือถือ */
+}
+
+html, body {
+  width: 100%;
+  min-height: 100vh;
+}
+
+body {
+  background-color: #070f1e;
+  /* ไล่เฉดสีพื้นหลังแบบมิติไซเบอร์ */
+  background-image: 
+    radial-gradient(circle at 50% 25%, #295f98 10%, #0d213a 80%, #050b14 90%),
+    linear-gradient(rgba(0, 229, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 30px 30px, 30px 30px;
+  background-attachment: fixed;
+  color: #94a3b8;
+  font-family: 'Share Tech Mono', monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 32px 16px; /* เผื่อระยะขอบรอบทิศทาง */
+  overflow-y: auto; /* ป้องกันเนื้อหาขาดบนจอที่มีความสูงน้อย */
+}
+
+/* ==========================================
+   CONTAINER & LAYOUT
+   ========================================== */
+.login-container {
+  width: 100%;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: auto;
+}
+
+/* --- HEADER & LOGO --- */
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.logo-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.shield-icon {
+  width: 64px;
+  height: 64px;
+  fill: none;
+  stroke: #00e5ff;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 14px rgba(0, 229, 255, 0.6));
+  transition: transform 0.3s ease;
+}
+
+.red-alert-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background-color: #ff4d4f;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #ff4d4f;
+  animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.2); }
+}
+
+.brand-title {
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #38bdf8;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  text-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: #94a3b8;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+.restricted-tag {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 14px;
+  font-size: 10px;
+  color: #64748b;
+  letter-spacing: 2px;
+}
+
+.restricted-tag::before,
+.restricted-tag::after {
+  content: "";
+  height: 1px;
+  width: 36px;
+  background-color: rgba(0, 229, 255, 0.25);
+}
+
+/* ==========================================
+   CARD (GLASSMORPHISM & ELEVATION)
+   ========================================== */
+.card {
+  width: 100%;
+  background: rgba(11, 22, 40, 0.88);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 12px;
+  padding: 28px 24px;
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.8),
+    0 0 30px rgba(0, 229, 255, 0.2),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 20px;
+}
+
+.status-online {
+  color: #00ff66;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot-green {
+  width: 6px;
+  height: 6px;
+  background-color: #00ff66;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #00ff66;
+}
+
+.version-text {
+  color: #64748b;
+}
+
+/* --- TABS --- */
+.auth-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: rgba(4, 10, 20, 0.7);
+  padding: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #64748b;
+  min-height: 40px; /* Touch target */
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  background: #0d2847;
+  color: #00e5ff;
+  border: 1px solid rgba(0, 229, 255, 0.6);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+  font-weight: bold;
+}
+
+/* ==========================================
+   FORM INPUTS & BUTTONS
+   ========================================== */
+.hidden {
+  display: none !important;
+}
+
+.input-group {
+  margin-bottom: 16px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.input-box {
+  display: flex;
+  align-items: center;
+  background: rgba(4, 9, 18, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: 6px;
+  padding: 0 12px;
+  min-height: 44px; /* Touch Standard 44px */
+  transition: all 0.3s ease;
+}
+
+.input-box:focus-within {
+  border-color: #00e5ff;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.3);
+  background: rgba(4, 9, 18, 0.95);
+}
+
+.prompt-symbol {
+  color: #00e5ff;
+  margin-right: 8px;
+  font-size: 14px;
+  user-select: none;
+}
+
+.input-box input,
+.select-box {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e2e8f0;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 14px;
+  padding: 10px 0;
+}
+
+.select-box {
+  cursor: pointer;
+}
+
+.select-box option {
+  background-color: #0b1628;
+  color: #e2e8f0;
+}
+
+.input-box input::placeholder {
+  color: #475569;
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  color: #64748b;
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  padding: 8px 10px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-btn:hover {
+  color: #00e5ff;
+}
+
+.forgot-pass-container {
+  display: flex;
+  justify-content: flex-end; /* จัดวางชิดขวาใต้ช่องรหัสผ่าน */
+  margin-top: -6px;          /* ขยับขึ้นให้กระชับกับช่องกรอกรหัสผ่าน */
+  margin-bottom: 20px;       /* เว้นระยะห่างลงมาจากปุ่ม LOGIN */
+}
+
+.forgot-pass-link {
+  color: #64748b;
+  font-size: 11px;
+  text-decoration: none;
+  letter-spacing: 1px;
+  transition: all 0.2s ease;
+}
+
+.forgot-pass-link:hover {
+  color: #00e5ff;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+/* --- SUBMIT BUTTON --- */
+.submit-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #0d3b66 0%, #0a2540 100%);
+  border: 1px solid #00e5ff;
+  color: #00e5ff;
+  min-height: 46px; /* Touch target ใหญ่ขึ้นบนมือถือ */
+  padding: 12px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 13px;
+  letter-spacing: 2px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.submit-btn:hover,
+.submit-btn:active {
+  background: #00e5ff;
+  color: #050811;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+  font-weight: bold;
+}
+
+/* --- FOOTER --- */
+.footer-note {
+  margin-top: 24px;
+  font-size: 10px;
+  color: #475569;
+  text-align: center;
+  letter-spacing: 1px;
+  line-height: 1.5;
+}
+
+/* ==========================================
+   RESPONSIVE MEDIA QUERIES
+   ========================================== */
+
+/* 1. สมาร์ตโฟนขนาดเล็ก (Smartphones <= 480px) */
+@media screen and (max-width: 480px) {
+  body {
+    padding: 20px 12px;
+  }
+
+  .card {
+    padding: 20px 16px; /* ลด padding ด้านข้างเพื่อเพิ่มพื้นที่กรอกข้อมูล */
+    border-radius: 10px;
+  }
+
+  .shield-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .brand-title {
+    font-size: 24px;
+    letter-spacing: 3px;
+  }
+
+  .brand-subtitle {
+    font-size: 10px;
+  }
+
+  /* ตั้งขนาดอักษรใน Input เป็น 16px สำหรับ iOS เพื่อป้องกัน Auto-Zoom */
+  .input-box input,
+  .select-box {
+    font-size: 16px;
+  }
+
+  .submit-btn {
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+}
+
+/* 2. หน้าจอมือถือแนวนอน หรือจอที่มีความสูงน้อย (Landscape / Short Screens <= 700px height) */
+@media screen and (max-height: 700px) {
+  body {
+    padding: 16px;
+  }
+
+  .header {
+    margin-bottom: 14px;
+  }
+
+  .shield-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  .logo-wrapper {
+    margin-bottom: 6px;
+  }
+
+  .restricted-tag {
+    margin-top: 8px;
+  }
+
+  .card {
+    padding: 20px 18px;
+  }
+
+  .input-group {
+    margin-bottom: 12px;
+  }
+
+  .footer-note {
+    margin-top: 16px;
+  }
+}
+
+/* 3. แท็บเล็ต (Tablets 481px - 768px) */
+@media screen and (min-width: 481px) and (max-width: 768px) {
+  .login-container {
+    max-width: 420px;
+  }
+}
+
+/* 4. โน้ตบุ๊กและหน้าจอคอมพิวเตอร์ใหญ่ (Laptops & Desktops >= 1024px) */
+@media screen and (min-width: 1024px) {
+  .login-container {
+    max-width: 460px;
+  }
+
+  .card:hover {
+    transform: translateY(-6px);
+    box-shadow: 
+      0 28px 65px rgba(0, 0, 0, 0.85),
+      0 0 45px rgba(0, 229, 255, 0.35),
+      inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  }
+}
