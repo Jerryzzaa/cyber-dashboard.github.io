@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <title>BANYATSAP MARKET SYSTEM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reset.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/night.min.css">
+  <style>
+    .reveal h2 { color: #f2c94c; font-size: 1.5em; text-transform: uppercase; margin-bottom: 20px;}
+    .reveal p, .reveal li { font-size: 0.7em; text-align: left; line-height: 1.4; }
+    .reveal table { font-size: 0.6em; width: 100%; border-collapse: collapse; margin-top: 20px; color: #fff;}
+    .reveal th { background: #333; color: #f2c94c; padding: 10px; border: 1px solid #666; }
+    .reveal td { padding: 10px; border: 1px solid #666; }
+    .reveal code { background: #222; color: #a6e22e; padding: 15px; display: block; font-size: 0.6em; text-align: left; border-radius: 5px;}
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <!-- Slide 1 -->
+      <section>
+        <h2>BANYATSAP MARKET</h2>
+        <h3>MANAGEMENT SYSTEM</h3>
+        <p style="text-align: center;">ระบบบริหารจัดการตลาดบัญญัติทรัพย์ เขตลาดกระบัง[cite: 2]</p>
+      </section>
+
+      <!-- Slide 2 -->
+      <section>
+        <h2>PAIN POINTS</h2>
+        <ul>
+          <li><b>ปริมาณแผงค้ามาก:</b> ระบบการเก็บค่าใช้จ่ายแบบเดิมไม่รองรับผู้ใช้งานจำนวนมาก[cite: 2]</li>
+          <li><b>ไม่เป็นปัจจุบันและผิดพลาดง่าย:</b> ไม่มีการอัปเดตระบบแบบเรียลไทม์ ต้องใช้เจ้าหน้าที่กรอกข้อมูลรายบุคคล[cite: 2]</li>
+          <li><b>ความไม่สะดวกในการชำระเงิน:</b> พ่อค้าแม่ค้าประจำต้องเดินไปสแกนจ่ายค่าแผง ค่าน้ำ และค่าไฟที่สำนักงานในทุกๆ วัน[cite: 2]</li>
+          <li><b>ขาดหลักฐานทางการเงิน:</b> พ่อค้าแม่ค้ามักจะขอรายละเอียดการเช่าเพื่อนำไปยื่นกู้เงินกับธนาคาร แต่ระบบเดิมออกเอกสารให้ยาก[cite: 2]</li>
+          <li><b>จัดการกฎระเบียบยาก:</b> ตลาดมีมาตรการตัดน้ำไฟทันทีหากค้างชำระเกิน 3 วัน ซึ่งระบบเดิมจัดการและติดตามได้ยาก[cite: 2]</li>
+        </ul>
+      </section>
+
+      <!-- Slide 3 -->
+      <section>
+        <h2>ER DIAGRAM</h2>
+        <p style="text-align: center; font-size: 1em; color: #888;">[ ภาพ ER Diagram 13 ตารางของระบบ ]</p>
+        <ul>
+          <li>ระบบประกอบด้วย 13 ตารางหลัก ที่ครอบคลุมการทำงานทั้งหมด[cite: 6]</li>
+          <li>ตารางหลักเชื่อมโยงกันผ่าน Foreign Key เช่น merchants เชื่อมกับ stalls, contracts, invoices และ walkin_bookings[cite: 3]</li>
+        </ul>
+      </section>
+
+      <!-- Slide 4 -->
+      <section>
+        <h2>DATABASE SCHEMA (ภาพรวม)</h2>
+        <ul>
+          <li><b>Merchants:</b> ใช้สำหรับเก็บข้อมูลส่วนตัวของผู้ค้า เช่น ชื่อ เบอร์โทร และประเภทผู้ค้า[cite: 3]</li>
+          <li><b>Stalls & Zones:</b> ใช้เก็บข้อมูลแผงค้า อัตราค่าเช่ารายวัน สถานะ และโซนที่แผงนั้นตั้งอยู่[cite: 3]</li>
+          <li><b>Invoices & Invoice_Items:</b> ใช้เก็บบิลเรียกเก็บเงินรวม และแจกแจงรายละเอียดค่าเช่า ค่าน้ำ ค่าไฟ[cite: 3]</li>
+          <li><b>Meters & Meter_Readings:</b> ใช้บันทึกข้อมูลมิเตอร์และประวัติการจดหน่วยมิเตอร์รายวัน[cite: 3]</li>
+        </ul>
+      </section>
+
+      <!-- Slide 5 -->
+      <section>
+        <h2>NORMALIZATION (UNF TO 3NF)</h2>
+        <p><b>การแปลงให้อยู่ในรูป 3NF สำหรับระบบการเงิน</b></p>
+        <ul>
+          <li><b>UNF (Unnormalized):</b> บิล 1 ใบมีข้อมูลผู้ค้า และรายละเอียดค่าแผง ค่าน้ำ ค่าไฟ รวมอยู่ในตารางเดียว[cite: 3]</li>
+          <li><b>3NF Invoices:</b> แยกตารางใบแจ้งหนี้หลัก (invoice_id, merchant_id, total)[cite: 3]</li>
+          <li><b>3NF Invoice_Items:</b> แยกตารางรายการย่อยในบิล (item_id, invoice_id, item_type, amount) เพื่อลดความซ้ำซ้อน[cite: 3]</li>
+        </ul>
+      </section>
+
+      <!-- Slide 6 -->
+      <section>
+        <h2>NORMALIZATION (Continuous)</h2>
+        <p><b>การแปลงให้อยู่ในรูป 3NF สำหรับระบบสาธารณูปโภค</b></p>
+        <ul>
+          <li><b>3NF Meters:</b> จัดเก็บข้อมูลพื้นฐานของมิเตอร์ (meter_id, stall_id, type, unit_rate)[cite: 3]</li>
+          <li><b>3NF Meter_Readings:</b> จัดเก็บประวัติการจดเลขมิเตอร์แบบรายวัน (reading_id, meter_id, read_date, value)[cite: 3]</li>
+        </ul>
+      </section>
+
+      <!-- Slide 7 -->
+      <section>
+        <h2>SCHEMA & INSTANCE (Merchants)</h2>
+        <p>Merchants ใช้เก็บข้อมูลผู้ค้าทั้งหมดในตลาด[cite: 3]</p>
+        <table>
+          <tr><th>merchant_id</th><th>name</th><th>phone</th><th>id_card_no</th><th>type</th></tr>
+          <tr><td>1</td><td>สมศรี แซ่ลิ้ม</td><td>086-254-7468</td><td>1154335349840</td><td>regular[cite: 12]</td></tr>
+          <tr><td>2</td><td>ประยูร ทองดี</td><td>082-940-9779</td><td>1499836243985</td><td>regular[cite: 12]</td></tr>
+          <tr><td>21</td><td>กิตติ ดวงดี</td><td>098-170-2533</td><td>NULL</td><td>walkin[cite: 12]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 8 -->
+      <section>
+        <h2>SCHEMA & INSTANCE (Stalls)</h2>
+        <p>Stalls ใช้เก็บข้อมูลแผงค้าและสถานะ[cite: 3]</p>
+        <table>
+          <tr><th>stall_id</th><th>zone_id</th><th>stall_no</th><th>daily_rate</th><th>status</th></tr>
+          <tr><td>1</td><td>1</td><td>A01</td><td>120.00</td><td>rented[cite: 13]</td></tr>
+          <tr><td>5</td><td>1</td><td>A05</td><td>120.00</td><td>cut_off[cite: 13]</td></tr>
+          <tr><td>21</td><td>4</td><td>F01</td><td>80.00</td><td>available[cite: 13]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 9 -->
+      <section>
+        <h2>SCHEMA & INSTANCE (Invoices)</h2>
+        <p>Invoices ใช้เก็บบิลที่เรียกเก็บเงินจากผู้ค้า[cite: 3]</p>
+        <table>
+          <tr><th>invoice_id</th><th>merchant_id</th><th>period_start</th><th>due_date</th><th>total</th><th>status</th></tr>
+          <tr><td>1</td><td>1</td><td>2026-09-11</td><td>2026-09-11</td><td>209.20</td><td>paid[cite: 4]</td></tr>
+          <tr><td>2</td><td>1</td><td>2026-09-12</td><td>2026-09-12</td><td>194.20</td><td>paid[cite: 4]</td></tr>
+          <tr><td>15</td><td>3</td><td>2026-09-11</td><td>2026-09-11</td><td>840.00</td><td>paid[cite: 4]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 10 -->
+      <section>
+        <h2>SCHEMA & INSTANCE (Invoice_Items)</h2>
+        <p>Invoice_Items ใช้เก็บรายละเอียดค่าใช้จ่ายในแต่ละบิลย่อย[cite: 3]</p>
+        <table>
+          <tr><th>item_id</th><th>invoice_id</th><th>item_type</th><th>quantity</th><th>amount</th></tr>
+          <tr><td>1</td><td>1</td><td>rent</td><td>1.00</td><td>120.00[cite: 8]</td></tr>
+          <tr><td>2</td><td>1</td><td>water</td><td>1.40</td><td>25.20[cite: 8]</td></tr>
+          <tr><td>3</td><td>1</td><td>electric</td><td>8.00</td><td>64.00[cite: 8]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 11 -->
+      <section>
+        <h2>SCHEMA & INSTANCE (Meter Readings)</h2>
+        <p>Meter_Readings ใช้เก็บบันทึกการจดหน่วยมิเตอร์รายวัน[cite: 3]</p>
+        <table>
+          <tr><th>reading_id</th><th>meter_id</th><th>read_date</th><th>value</th><th>recorded_by</th></tr>
+          <tr><td>1</td><td>1</td><td>2026-09-10</td><td>820.90</td><td>3[cite: 10]</td></tr>
+          <tr><td>2</td><td>1</td><td>2026-09-11</td><td>822.30</td><td>2[cite: 10]</td></tr>
+          <tr><td>9</td><td>2</td><td>2026-09-10</td><td>442.90</td><td>3[cite: 10]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 12 -->
+      <section>
+        <h2>SCHEMA & INSTANCE (Notifications & Cuts)</h2>
+        <p>ใช้สำหรับจัดการการค้างชำระและการตัดน้ำไฟ[cite: 3]</p>
+        <ul>
+          <li><b>Notifications:</b> แจ้งเตือนยอดเกินกำหนด เช่น merchant_id 5 ค้างชำระเกิน 3 วัน[cite: 9]</li>
+          <li><b>Utility_Cuts:</b> บันทึกประวัติการถูกตัดน้ำไฟ เช่น stall_id 5 ถูกตัดเมื่อ 2026-09-17[cite: 15]</li>
+        </ul>
+      </section>
+
+      <!-- Slide 13 -->
+      <section>
+        <h2>SQL QUERIES (1) - หาแผงว่าง</h2>
+        <p>ตรวจสอบแผงค้าหน้าตลาด (ขาจร) ที่ยังว่างอยู่[cite: 2]</p>
+        <code>SELECT stall_no, daily_rate FROM stalls WHERE zone_id = 4 AND status = 'available';</code>
+        <table>
+          <tr><th>stall_no</th><th>daily_rate</th></tr>
+          <tr><td>F01</td><td>80.00[cite: 13]</td></tr>
+          <tr><td>F02</td><td>80.00[cite: 13]</td></tr>
+          <tr><td>F03</td><td>80.00[cite: 13]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 14 -->
+      <section>
+        <h2>SQL QUERIES (2) - รายละเอียดบิล</h2>
+        <p>แจกแจงค่าเช่าแผง ค่าน้ำ และค่าไฟ เพื่อเป็นหลักฐานให้ผู้ค้านำไปยื่นกู้[cite: 2]</p>
+        <code>SELECT item_type, quantity, amount FROM invoice_items WHERE invoice_id = 1;</code>
+        <table>
+          <tr><th>item_type</th><th>quantity</th><th>amount</th></tr>
+          <tr><td>rent</td><td>1.00</td><td>120.00[cite: 8]</td></tr>
+          <tr><td>water</td><td>1.40</td><td>25.20[cite: 8]</td></tr>
+          <tr><td>electric</td><td>8.00</td><td>64.00[cite: 8]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 15 -->
+      <section>
+        <h2>SQL QUERIES (3) - แจ้งเตือนค้างชำระ</h2>
+        <p>เพื่อติดตามบิลที่เกินกำหนดชำระ[cite: 2]</p>
+        <code>SELECT merchant_id, message FROM notifications WHERE is_read = 0 LIMIT 2;</code>
+        <table>
+          <tr><th>merchant_id</th><th>message</th></tr>
+          <tr><td>5</td><td>บิลวันที่ 2026-09-13 ยอด 204.00 บาท เกินกำหนดชำระ...[cite: 9]</td></tr>
+          <tr><td>5</td><td>ค้างชำระเกิน 3 วัน ระบบได้แจ้งเจ้าหน้าที่เพื่อดำเนิ...[cite: 9]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 16 -->
+      <section>
+        <h2>SQL QUERIES (4) - แผงที่ถูกตัดน้ำไฟ</h2>
+        <p>ตรวจสอบสถานะแผงที่ถูกตัดน้ำไฟจากมาตรการค้างชำระ 3 วัน[cite: 2]</p>
+        <code>SELECT cut_id, stall_id, cut_at FROM utility_cuts WHERE restored_at IS NULL;</code>
+        <table>
+          <tr><th>cut_id</th><th>stall_id</th><th>cut_at</th></tr>
+          <tr><td>1</td><td>5</td><td>2026-09-17 09:30:00[cite: 15]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 17 -->
+      <section>
+        <h2>SQL QUERIES (5) - ประวัติชำระเงิน</h2>
+        <p>ยืนยันสถานะการชำระเงินรายวันของแต่ละบิล[cite: 2]</p>
+        <code>SELECT invoice_id, amount, method, ref_no FROM payments WHERE invoice_id = 1;</code>
+        <table>
+          <tr><th>invoice_id</th><th>amount</th><th>method</th><th>ref_no</th></tr>
+          <tr><td>1</td><td>209.20</td><td>qr</td><td>PM26000001[cite: 7]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 18 -->
+      <section>
+        <h2>SQL QUERIES (6) - ประวัติจดมิเตอร์</h2>
+        <p>ตรวจสอบยอดการใช้ไฟฟ้า/น้ำประปาของแผงค้ารายวัน[cite: 2, 3]</p>
+        <code>SELECT read_date, value, recorded_by FROM meter_readings WHERE meter_id = 1;</code>
+        <table>
+          <tr><th>read_date</th><th>value</th><th>recorded_by</th></tr>
+          <tr><td>2026-09-10</td><td>820.90</td><td>3[cite: 10]</td></tr>
+          <tr><td>2026-09-11</td><td>822.30</td><td>2[cite: 10]</td></tr>
+          <tr><td>2026-09-12</td><td>823.80</td><td>3[cite: 10]</td></tr>
+        </table>
+      </section>
+
+      <!-- Slide 19 -->
+      <section>
+        <h2>MEMBERS</h2>
+        <p><b>สมาชิกผู้จัดทำ</b></p>
+        <ul>
+          <li>น.ส.ปิยพร คูหาเรือน 67010573[cite: 2]</li>
+          <li>น.ส.อธิกานต์ ศรีประทุม 67011005[cite: 2]</li>
+          <li>นายอภิรัก จีนทั้ง 67011018[cite: 2]</li>
+          <li>น.ส.อภิสรา สมมุติ 67011680[cite: 2]</li>
+        </ul>
+      </section>
+
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.js"></script>
+  <script>Reveal.initialize({ hash: true });</script>
+</body>
+</html>
