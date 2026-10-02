@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart SIEM | AI Analyst</title>
+  <link rel="stylesheet" href="chatbot.css">
+</head>
+<body>
+  <div class="ai-sidebar">
+    <header class="ai-header">
+      <div class="header-profile"><div class="header-avatar">AI</div><div class="header-info"><div class="bot-name">AI Analyst</div><div class="bot-status"><span class="status-dot"></span> Node 3</div></div></div>
+      <div class="header-actions"><button id="createReportBtn" class="header-btn report-btn" type="button" title="สร้างรายงาน PDF สำหรับผู้บริหาร">สร้างรายงาน PDF</button><button id="newChatBtn" class="header-btn" type="button" title="เริ่มแชตใหม่">＋</button><button id="expandBtn" class="header-btn" type="button" title="ขยายหรือย่อแชต">⤢</button></div>
+    </header>
+    <div class="chat-history" id="chatHistory" aria-live="polite"></div>
+    <div class="chat-bottom"><div class="suggestion-tags"><button class="tag-btn" type="button">สรุปภาพรวม</button><button class="tag-btn" type="button">สัญญาณที่ควรตรวจสอบ</button><button class="tag-btn" type="button">top sources</button></div><div class="input-container"><input type="text" id="aiInput" placeholder="ถามเกี่ยวกับข้อมูล Smart SIEM…" maxlength="4000" autocomplete="off" aria-label="ข้อความถึง AI Analyst"><button id="sendBtn" class="send-btn" type="button" aria-label="ส่งข้อความ">➤</button></div><p class="input-note">คำตอบอ้างอิงข้อมูลจาก Node 2 เท่านั้น · รายงาน PDF สร้างแบบ async</p></div>
+  </div>
+  <script src="smart_siem_chat_v2.js"></script>
+</body>
+</html>
