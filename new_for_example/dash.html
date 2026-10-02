@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart SIEM V2 | SOC Dashboard</title>
+  <link rel="stylesheet" href="dash.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/globe.gl"></script>
+</head>
+<body>
+  <div class="app-layout">
+    <main class="main-dashboard">
+      <header class="header">
+        <div class="logo"><span class="dot red-dot"></span> Smart SIEM <span class="logo-muted">/ Model signals</span></div>
+        <div class="header-meta"><span id="latestDataDay">Loading data…</span><span class="time" id="live-clock">00:00:00 ICT</span></div>
+      </header>
+      <div class="dashboard-grid">
+        <aside class="left-panel">
+          <div class="card kpi-card"><div class="card-title">SIGNALS TODAY · LATEST DATA DAY</div><div class="kpi-value red-text">—</div><div class="kpi-subtext">source log rows</div></div>
+          <div class="card kpi-card"><div class="card-title">DENIED-ACTIVITY SIGNALS</div><div class="kpi-value blue-text">—</div><div class="kpi-subtext">denied log rows</div></div>
+          <div class="card kpi-card"><div class="card-title">HIGH-PRIORITY ACTIVE</div><div class="kpi-value red-text">—</div><div class="kpi-subtext">incidents meeting the UI triage threshold</div></div>
+          <div class="card"><div class="card-title">TOP DESTINATION PORTS</div><div class="port-legend" id="portLegengContainer"></div></div>
+          <div class="card country-card"><div class="card-title">OBSERVED SOURCE GEOGRAPHY</div><p class="card-note">Country labels from source metadata; not attacker location.</p><div id="topCountriesList"></div></div>
+        </aside>
+        <div class="center-panel">
+          <div class="top-row">
+            <div class="card map-card">
+              <div class="card-heading"><div class="card-title">OBSERVED GEOGRAPHY · VISUAL ONLY</div><button id="expandGlobeBtn" class="outline-btn" type="button">Fullscreen</button></div>
+              <div id="globeContainer"></div>
+              <p class="card-note">Country markers are approximate centroids; no IP geolocation or attack route is implied.</p>
+            </div>
+            <div class="card chart-card"><div class="card-title">SIGNAL TYPES · CURRENT DETECTOR CATEGORIES</div><div class="chart-container"><canvas id="attackTypeChart"></canvas></div><p class="card-note">Categories are model signals, not confirmed outcomes.</p></div>
+          </div>
+          <div class="card volume-card"><div class="card-heading"><div class="card-title">SIGNAL VOLUME · LAST 24 HOURS</div><span id="volumeSummary" class="card-note"></span></div><div class="chart-container-bar"><canvas id="attackVolumeChart"></canvas></div></div>
+          <div class="card table-card">
+            <div class="table-header-filters"><span>TRIAGE RISK</span><button class="filter-btn active" data-filter="all" type="button">ALL</button><button class="filter-btn" data-filter="80+" type="button">80+</button><button class="filter-btn" data-filter="60-79" type="button">60–79</button><button class="filter-btn" data-filter="&lt;60" type="button">&lt;60</button><span id="event-count">0 recent model signals</span></div>
+            <div class="table-scroll"><table class="events-table"><thead><tr><th>TIME (ICT)</th><th>OBSERVED IP</th><th>COUNTRY LABEL</th><th>DESTINATION IP</th><th>DETECTOR CATEGORY</th><th>TRIAGE RISK</th><th>DEST PORT</th><th>OBSERVATION</th><th>SENSORS</th></tr></thead><tbody id="eventsTableBody"></tbody></table></div>
+            <p class="card-note">Triage score is a ranking aid, not compromise probability or validated severity. Denied traffic is an observation, not proof an attack was stopped.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+    <iframe src="chatbot.html" id="chatbot-iframe" title="Smart SIEM AI Analyst"></iframe>
+  </div>
+  <div id="globeModal" class="globe-modal" role="dialog" aria-label="Observed geography visualization"><button id="closeGlobeModal" class="close-modal" type="button" aria-label="Close">×</button><div id="modalGlobeContainer"></div><p>Visual only: country centroids are not IP locations or attack routes.</p></div>
+  <script src="smart_siem_ui_v2.js"></script>
+</body>
+</html>

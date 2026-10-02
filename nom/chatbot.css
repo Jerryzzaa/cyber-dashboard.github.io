@@ -12,21 +12,21 @@ body, html {
 }
 
 /* =========================================
-   1. MAIN CONTAINER (บังคับเรียงเป็น Flex แนวตั้ง)
+   1. MAIN CONTAINER
    ========================================= */
 .ai-sidebar {
     width: 100%;
     height: 100vh;
     background-color: #0b1121;
     border-left: 1px solid #1e293b;
-    display: flex !important;
-    flex-direction: column !important;
+    display: flex;
+    flex-direction: column;
     position: relative;
     transition: all 0.3s ease;
 }
 
 /* =========================================
-   2. HEADER (ให้ต่อแถวบนสุดเสมอ ไม่ลอยบังแชท)
+   2. HEADER
    ========================================= */
 .ai-header {
     padding: 14px 18px;
@@ -36,26 +36,52 @@ body, html {
     border-bottom: 1px solid #1e293b;
     background-color: #0f172a;
     z-index: 10;
-    flex-shrink: 0 !important; /* ห้ามโดนบีบย่อ */
-    position: relative !important; /* ป้องกันไม่ให้ลอยทับส่วนอื่น */
+    flex-shrink: 0;
+    position: relative;
 }
 
-.header-profile { display: flex; align-items: center; gap: 10px; }
+.header-profile { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+}
 
 .header-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #06b6d4, #3b82f6);
-    flex-shrink: 0;
+    display: none; /* ซ่อนตามดีไซน์เดิม */
 }
 
-.header-info { display: flex; flex-direction: column; }
-.bot-name { color: #f8fafc; font-weight: 600; font-size: 14px; }
-.bot-status { color: #94a3b8; font-size: 11px; display: flex; align-items: center; gap: 5px; margin-top: 2px; }
-.status-dot { width: 7px; height: 7px; background-color: #10b981; border-radius: 50%; }
+.header-info { 
+    display: flex; 
+    flex-direction: column; 
+}
 
-.header-actions { display: flex; align-items: center; gap: 8px; }
+.bot-name { 
+    color: #f8fafc; 
+    font-weight: 600; 
+    font-size: 14px; 
+}
+
+.bot-status { 
+    color: #94a3b8; 
+    font-size: 11px; 
+    display: flex; 
+    align-items: center; 
+    gap: 5px; 
+    margin-top: 2px; 
+}
+
+.status-dot { 
+    width: 7px; 
+    height: 7px; 
+    background-color: #10b981; 
+    border-radius: 50%; 
+}
+
+.header-actions { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+}
 
 .header-btn {
     background: transparent;
@@ -69,39 +95,77 @@ body, html {
     border-radius: 6px;
     transition: all 0.2s;
 }
-.header-btn:hover { color: #f8fafc; background-color: #1e293b; }
-.close-icon { color: #64748b; cursor: pointer; font-size: 16px; font-weight: bold; line-height: 1; margin-left: 4px; }
-.close-icon:hover { color: #f8fafc; }
+
+.header-btn:hover { 
+    color: #f8fafc; 
+    background-color: #1e293b; 
+}
+
+.close-icon { 
+    color: #64748b; 
+    cursor: pointer; 
+    font-size: 16px; 
+    font-weight: bold; 
+    line-height: 1; 
+    margin-left: 4px; 
+}
+
+.close-icon:hover { 
+    color: #f8fafc; 
+}
 
 /* =========================================
-   3. CHAT HISTORY (กินพื้นที่ตรงกลางที่เหลือ)
+   3. CHAT HISTORY
    ========================================= */
 .chat-history {
-    flex: 1 !important; /* ขยายเต็มพื้นที่ส่วนกลาง */
+    flex: 1;
     padding: 16px;
-    overflow-y: auto !important;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
     gap: 14px;
     position: relative;
     z-index: 1;
 }
 
-.message-wrapper { display: flex; gap: 10px; max-width: 90%; }
-.message-wrapper.bot { align-self: flex-start; }
-.message-wrapper.user { align-self: flex-end; flex-direction: row-reverse; }
-
-.message-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #06b6d4, #3b82f6);
-    flex-shrink: 0;
-    margin-top: 2px;
+.message-wrapper { 
+    display: flex; 
+    gap: 10px; 
+    max-width: 85%; 
+    width: auto;
 }
 
-.message-content { display: flex; flex-direction: column; }
-.message-wrapper.user .message-content { align-items: flex-end; }
+.message-wrapper.bot { 
+    align-self: flex-start; 
+    margin-right: auto;
+    margin-left: 0;
+}
+
+.message-wrapper.user { 
+    align-self: flex-end; 
+    flex-direction: row-reverse; 
+    margin-left: auto;
+    margin-right: 0;
+}
+
+.message-avatar {
+    display: none; /* ซ่อนตามดีไซน์เดิม */
+}
+
+.message-content { 
+    display: flex; 
+    flex-direction: column; 
+}
+
+.message-wrapper.bot .message-content { 
+    align-items: flex-start; 
+}
+
+.message-wrapper.user .message-content { 
+    align-items: flex-end; 
+}
 
 .message-bubble {
     padding: 10px 14px;
@@ -111,6 +175,8 @@ body, html {
     background-color: #1e293b;
     color: #f8fafc;
     word-wrap: break-word;
+    display: inline-block;
+    text-align: left;
 }
 
 .message-bubble p { margin: 0 0 8px 0; }
@@ -121,19 +187,29 @@ body, html {
 .message-wrapper.user .message-bubble {
     background-color: #06b6d4;
     color: #0b1121;
-    font-weight: 500;
+    font-weight: 600;
+    border-radius: 14px 14px 2px 14px;
 }
 
-.message-time { font-size: 10px; color: #64748b; margin-top: 4px; }
+.message-time { 
+    font-size: 10px; 
+    color: #64748b; 
+    margin-top: 4px; 
+    display: block;
+    width: 100%;
+}
+
+.message-wrapper.bot .message-time { text-align: left; }
+.message-wrapper.user .message-time { text-align: right; }
 
 /* =========================================
-   4. CHAT INPUT AREA (แถบพิมพ์อยู่ล่างสุดเสมอ)
+   4. CHAT INPUT AREA
    ========================================= */
 .chat-bottom {
     padding: 12px 16px 16px 16px;
     background-color: #0b1121;
     border-top: 1px solid #1e293b;
-    flex-shrink: 0 !important;
+    flex-shrink: 0;
     z-index: 10;
 }
 
@@ -150,9 +226,10 @@ body, html {
     background: #1e293b;
     border: 1px solid #334155;
     color: #cbd5e1;
-    padding: 5px 12px;
-    border-radius: 14px;
-    font-size: 11px;
+    padding: 9px 18px;     /* 👈 ปรับเพิ่มความกว้างและสูงของปุ่ม (เดิม 5px 12px) */
+    border-radius: 18px;   /* 👈 ปรับความโค้งมนให้สมส่วนกับปุ่มที่ใหญ่ขึ้น (เดิม 14px) */
+    font-size: 13px;       /* 👈 ขยายขนาดตัวอักษรให้ใหญ่ขึ้น (เดิม 11px) */
+    font-weight: 500;      /* 👈 เพิ่มความหนาตัวหนังสือให้อ่านง่ายขึ้น */
     cursor: pointer;
     white-space: nowrap;
     transition: 0.2s;
@@ -197,76 +274,7 @@ body, html {
 .send-btn:hover { background-color: #22d3ee; }
 
 /* =========================================
-   5. GEMINI STYLE (เฉพาะตอนหน้าว่าง + ขยายเต็มจอ)
-   ========================================= */
-.ai-sidebar.expanded.is-empty .ai-header {
-    background: transparent;
-    border-bottom: none;
-    padding: 20px 32px;
-}
-
-.ai-sidebar.expanded.is-empty .chat-history {
-    justify-content: center;
-    align-items: center;
-    padding: 0 20px;
-}
-
-.ai-sidebar.expanded.is-empty .message-wrapper.bot {
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 760px;
-}
-
-.ai-sidebar.expanded.is-empty .message-avatar { display: none; }
-.ai-sidebar.expanded.is-empty .message-time { display: none; }
-
-.ai-sidebar.expanded.is-empty .message-bubble {
-    background-color: transparent;
-    font-size: 26px;
-    font-weight: 500;
-    color: #f8fafc;
-    text-align: center;
-    padding: 0;
-    line-height: 1.4;
-}
-
-.ai-sidebar.expanded.is-empty .chat-bottom {
-    background: transparent;
-    border-top: none;
-    width: 100%;
-    max-width: 760px;
-    margin: 0 auto;
-    padding: 0 20px 24px 20px;
-}
-
-.ai-sidebar.expanded.is-empty .suggestion-tags {
-    justify-content: center;
-    gap: 8px;
-    margin-bottom: 16px;
-}
-
-.ai-sidebar.expanded.is-empty .tag-btn {
-    padding: 7px 14px;
-    font-size: 12px;
-    border-radius: 18px;
-}
-
-.ai-sidebar.expanded.is-empty .input-container {
-    padding: 8px 10px 8px 18px;
-    border-radius: 28px;
-}
-
-.ai-sidebar.expanded.is-empty #aiInput {
-    font-size: 15px;
-}
-/* เอาวงกลม ไอคอน Avatar ทั้งหมดออก */
-.header-avatar, 
-.message-avatar {
-    display: none !important;
-}
-/* =========================================
-   TYPING INDICATOR (จุดรอตอบของ Bot)
+   6. TYPING INDICATOR
    ========================================= */
 .typing-indicator {
     display: flex;
@@ -289,12 +297,144 @@ body, html {
 .typing-indicator span:nth-child(3) { animation-delay: 0s; }
 
 @keyframes typingBounce {
-    0%, 80%, 100% {
-        transform: scale(0.6);
-        opacity: 0.4;
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1.1); opacity: 1; }
+}
+
+/* =========================================
+   7. RESPONSIVE DESIGN (สำหรับ MacBook / จอเล็ก)
+   ========================================= */
+@media (max-height: 850px), (max-width: 1440px) {
+    .ai-header { padding: 8px 14px; }
+    .bot-name { font-size: 13px; }
+    .chat-history { padding: 10px; gap: 10px; }
+    .message-bubble { font-size: 12px; padding: 8px 12px; }
+    .chat-bottom { padding: 8px 12px 12px 12px; }
+    .tag-btn { font-size: 13px; padding: 4px 10px; }
+    .input-container { padding: 2px 4px 2px 12px; }
+    #aiInput { font-size: 12px; }
+    .send-btn { width: 28px; height: 28px; }
+}
+.header-btn.report-btn {
+    border: 1px solid #0c8298;
+    color: #06b6d4;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 6px 8px;
+}
+
+.header-btn.report-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.download-link {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 10px;
+    border: 1px solid #2dd7a9;
+    border-radius: 6px;
+    color: #42e8bc;
+    text-decoration: none;
+}
+
+.download-link:hover {
+    text-decoration: underline;
+}
+/* Modern chat buttons — append after all existing CSS. */
+.ai-sidebar .suggestion-tags {
+    gap: 8px;
+    padding-bottom: 4px;
+}
+.ai-sidebar .suggestion-tags .tag-btn {
+    flex: 0 0 auto;
+    min-height: 34px;
+    padding: 7px 12px;
+    border: 1px solid #2d3b50;
+    border-radius: 10px;
+    background: #141e2e;
+    color: #cbd5e1;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+    letter-spacing: normal;
+    box-shadow: none;
+    transition: background-color .15s, border-color .15s, color .15s;
+}
+.ai-sidebar .suggestion-tags .tag-btn:hover {
+    background: #1c293b;
+    border-color: #506178;
+    color: #f1f5f9;
+}
+.ai-sidebar .header-btn.report-btn,
+.ai-sidebar .download-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 34px;
+    padding: 7px 12px;
+    box-sizing: border-box;
+    border: 1px solid #285347;
+    border-radius: 10px;
+    background: #142e28;
+    color: #a7f3d0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: normal;
+    text-shadow: none;
+    text-decoration: none;
+    white-space: nowrap;
+    box-shadow: none;
+    transition: background-color .15s, border-color .15s;
+}
+.ai-sidebar .header-btn.report-btn::before,
+.ai-sidebar .download-link::before {
+    content: "";
+    display: block;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M12 3v12m-5-5 5 5 5-5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M12 3v12m-5-5 5 5 5-5M4 16v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.ai-sidebar .header-btn.report-btn:hover:not(:disabled),
+.ai-sidebar .download-link:hover {
+    background: #1c3e34;
+    border-color: #3b8066;
+    color: #d1fae5;
+    box-shadow: none;
+    text-decoration: none;
+}
+.ai-sidebar .header-btn.report-btn:disabled {
+    opacity: .5;
+    cursor: wait;
+}
+.ai-sidebar .download-link {
+    margin-top: 10px;
+    min-height: 38px;
+    padding: 9px 14px;
+    max-width: 100%;
+    white-space: normal;
+}
+.ai-sidebar .tag-btn:focus-visible,
+.ai-sidebar .report-btn:focus-visible,
+.ai-sidebar .download-link:focus-visible {
+    outline: 2px solid #6ee7b7;
+    outline-offset: 3px;
+}
+@media (max-width: 360px) {
+    .ai-sidebar .suggestion-tags .tag-btn {
+        padding: 6px 10px;
     }
-    40% {
-        transform: scale(1.1);
-        opacity: 1;
+    .ai-sidebar .header-btn.report-btn {
+        gap: 6px;
+        padding: 6px 8px;
+        font-size: 11px;
     }
 }

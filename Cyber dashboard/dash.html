@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyberwatch SOC</title>
+    <title>Cyber Attack Dashboard</title>
     <link rel="stylesheet" href="dash.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
@@ -22,6 +22,7 @@
                     <span class="dot red-dot"></span> Cyber Attack Dashboard
                 </div>
                 <div class="status-indicators">
+                    <span id="latestDataDay" class="latest-data-day">Loading data…</span>
                     <span class="time" id="live-clock">00:00:00 ICT</span>
                 </div>
             </header>
@@ -30,23 +31,23 @@
                 
                 <div class="left-panel">
                     <div class="card">
-                        <div class="card-title">ATTACKS TODAY</div>
+                        <div class="card-title">ATTACKS TODAY · LATEST DATA DAY</div>
                         <div class="kpi-value red-text">510</div>
-                        
+                        <div class="kpi-subtext">from — source log rows</div>
                     </div>
                     <div class="card">
-                        <div class="card-title">BLOCKED</div>
+                        <div class="card-title">DENIED-ACTIVITY SIGNALS</div>
                         <div class="kpi-value blue-text">372</div>
-                        
+                        <div class="kpi-subtext">from — denied log rows</div>
                     </div>
                     <div class="card">
-                        <div class="card-title">CRITICAL ACTIVE</div>
+                        <div class="card-title">HIGH-PRIORITY ACTIVE</div>
                         <div class="kpi-value red-text">5</div>
-                        
+                        <div class="kpi-subtext">incidents meeting the UI triage threshold</div>
                     </div>
                     <!-- Exfiltration Channels -->
-                    <div class="panel right-panel-card">
-                        <div class="card-title">Exfiltration Channels (Destination Ports)</div>
+                    <div class="card">
+                        <div class="card-title">TOP DESTINATION PORTS</div>
                         <div class="port-legend" id="portLegengContainer"></div>
                     </div>
                     <div class="card">
@@ -85,33 +86,52 @@
 
                     <div class="card table-card">
                         <div class="table-header-filters">
-                            <span>FILTER:</span>
-                            <button class="filter-btn active" data-filter="ALL">ALL</button>
-                            <button class="filter-btn" data-filter="CRITICAL">CRITICAL</button>
-                            <button class="filter-btn" data-filter="HIGH">HIGH</button>
-                            <button class="filter-btn" data-filter="MEDIUM">MEDIUM</button>
-                            <button class="filter-btn" data-filter="LOW">LOW</button>
-                            <span id="event-count" style="margin-left: auto; font-size: 10px; color: #64748b;">0 events</span>
-                        </div>
+                         <span>TRIAGE RISK</span>
 
-                        <table class="events-table">
-                            <thead>
-                                <tr>
-                                    <th>TIME</th>
-                                    <th>SRC IP</th>
-                                    <th>CC</th>
-                                    <th>DST IP</th>
-                                    <th>TYPE</th>
-                                    <th>SEV</th>
-                                    <th>PORT</th>
-                                    <th>STATUS</th>
-                                    <th style="text-align: right;">PKTS</th>
-                                </tr>
-                            </thead>
-                            <tbody id="eventsTableBody">
-                                <!-- ข้อมูลจาก JS -->
-                            </tbody>
-                        </table>
+                        <button class="filter-btn active"
+                            type="button"
+                            data-filter="all"
+                            aria-pressed="true">ALL</button>
+
+                        <button class="filter-btn"
+                            type="button"
+                            data-filter="80+"
+                            aria-pressed="false">80+</button>
+
+                        <button class="filter-btn"
+                            type="button"
+                            data-filter="60-79"
+                            aria-pressed="false">60–79</button>
+
+                        <button class="filter-btn"
+                            type="button"
+                            data-filter="&lt;60"
+                            aria-pressed="false">&lt;60</button>
+
+                        <span id="event-count" style="margin-left: auto;">
+                            0 of 0 recent model signals
+                         </span>
+                    </div>
+
+                        <div class="table-scroll">
+                            <table class="events-table">
+                                <thead>
+                                    <tr>
+                                        <th>TIME (ICT)</th>
+                                        <th>OBSERVED IP</th>
+                                        <th>COUNTRY LABEL</th>
+                                        <th>DESTINATION IP</th>
+                                        <th>DETECTOR CATEGORY</th>
+                                        <th>TRIAGE RISK</th>
+                                        <th>DEST PORT</th>
+                                        <th>OBSERVATION</th>
+                                        <th>SENSORS</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="eventsTableBody"></tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -128,7 +148,6 @@
         <span class="close-modal" id="closeGlobeModal">&times;</span>
         <div id="modalGlobeContainer"></div>
     </div>
-
-    <script src="dash.js"></script>
+    <script src="dash2.js"></script>
 </body>
 </html>
