@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>CYBER - Authentication</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+  <div class="login-container">
+    
+    <!-- Header Section -->
+    <div class="header">
+      <div class="logo-wrapper">
+        <svg class="shield-icon" viewBox="0 0 24 24">
+          <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-5.45 9-12V7l-9-5z"/>
+          <path d="M13 10h-2v3H9l3 4 3-4h-2v-3z" fill="#00e5ff"/>
+        </svg>
+        <div class="red-alert-dot"></div>
+      </div>
+      <div class="brand-title">CYBER ATTACK</div>
+      <div class="brand-subtitle">SECURITY OPERATIONS DASHBOARD</div>
+      <div class="restricted-tag">RESTRICTED ACCESS</div>
+    </div>
+
+    <!-- Login / Register Card -->
+    <div class="card">
+      <div class="card-top">
+    <div class="status-online">
+          <span class="dot-green"></span>
+          <span>SYSTEM ONLINE</span>
+        </div>
+        <!-- <div class="version-text">AUTH v3.1.2</div> -->
+      </div>
+
+      <!-- Tab Switcher -->
+      <div class="auth-tabs">
+        <button id="tabLoginBtn" class="tab-btn active" type="button">LOGIN</button>
+        <button id="tabRegisterBtn" class="tab-btn" type="button">REGISTER</button>
+      </div>
+
+      <!-- FORM 1: LOGIN -->
+      <form id="loginForm">
+        <div class="input-group">
+          <label for="loginEmail">EMAIL</label>
+          <div class="input-box">
+            <span class="prompt-symbol">&gt;</span>
+            <input type="email" id="loginEmail" placeholder="operator@soc.local" required autocomplete="off">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="loginPassword">PASSWORD</label>
+          <div class="input-box">
+            <span class="prompt-symbol">&gt;</span>
+            <input type="password" id="loginPassword" placeholder="••••••••" required>
+            <button type="button" class="toggle-btn" data-target="loginPassword">SHOW</button>
+          </div>
+        </div>
+
+        <div class="forgot-pass-container">
+          <a href="#" id="forgotPasswordLink" class="forgot-pass-link">FORGOT PASSWORD?</a>
+        </div>
+
+        <button type="submit" class="submit-btn">LOGIN</button>
+      </form>
+
+      <!-- FORM 2: REGISTER -->
+      <form id="registerForm" class="hidden">
+        <!-- <div class="input-group">
+          <label for="regOperatorId">OPERATOR CALLSIGN / NAME</label>
+          <div class="input-box">
+            <span class="prompt-symbol">&gt;</span>
+            <input type="text" id="regOperatorId" placeholder="CYBER_UNIT_01" required autocomplete="off">
+          </div>
+        </div> -->
+
+         <div class="input-group">
+          <label for="regClearance">CLEARANCE LEVEL</label>
+          <div class="input-box">
+            <span class="prompt-symbol">&gt;</span>
+            <select id="regClearance" class="select-box" required>
+              <option value="L1">L1 - TIER 1 ANALYST</option>
+              <option value="L2">L2 - TIER 2 INVESTIGATOR</option>
+              <option value="L3">L3 - SOC MANAGER</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="regEmail">EMAIL</label>
+          <div class="input-box">
+            <span class="prompt-symbol">&gt;</span>
+            <input type="email" id="regEmail" placeholder="new.operator@soc.local" required autocomplete="off">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="regPassword">PASSWORD</label>
+          <div class="input-box">
+            <span class="prompt-symbol">&gt;</span>
+            <input type="password" id="regPassword" placeholder="••••••••" required>
+            <button type="button" class="toggle-btn" data-target="regPassword">SHOW</button>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="regConfirmPassword">CONFIRM PASSWORD</label>
+          <div class="input-box">
+            <span class="prompt-symbol">&gt;</span>
+            <input type="password" id="regConfirmPassword" placeholder="••••••••" required>
+            <button type="button" class="toggle-btn" data-target="regConfirmPassword">SHOW</button>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-btn">REQUEST ACCESS &rarr;</button>
+      </form>
+
+    </div>
+
+    <!-- Footer Note -->
+    <div class="footer-note">
+      UNAUTHORIZED ACCESS IS PROHIBITED &middot; ALL SESSIONS LOGGED
+    </div>
+
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>
