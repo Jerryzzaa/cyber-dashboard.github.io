@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analyst</title>
+    <link rel="stylesheet" href="chatbot.css">
+    
+    <!-- 🌟 สคริปต์สำหรับแปลงข้อความ Markdown เป็น HTML (ตาราง) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- Sanitize assistant Markdown before rendering; structured tables use textContent. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
+</head>
+<body>
+
+    <!-- เพิ่มคลาส expanded เข้าไปตรงนี้ เพื่อให้เปิดมาเต็มจอตั้งแต่เริ่ม -->
+    <div class="ai-sidebar expanded">
+        
+        <!-- Header -->
+        <div class="ai-header">
+            <div class="header-profile">
+                <div class="header-avatar"></div>
+                <div class="header-info">
+                    <div class="bot-name">AI Analyst</div>
+                    <div class="bot-status"><span class="status-dot"></span> Online</div>
+                </div>
+            </div>
+            
+            <div class="header-actions">
+                <button
+                    id="createReportBtn"
+                    class="header-btn report-btn"
+                    type="button"
+                    title="สร้างรายงาน PDF สำหรับผู้บริหาร">
+                    สร้าง PDF
+                </button>
+                <!-- ปุ่มเริ่มแชทใหม่ -->
+                <button id="newChatBtn" class="header-btn" title="เริ่มแชทใหม่">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                </button>
+                <button id="expandBtn" class="header-btn" title="ย่อหน้าจอ">
+                    <svg id="expandIcon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- ประวัติการแชท -->
+        <div class="chat-history" id="chatHistory">
+            <div class="message-wrapper bot">
+                <div class="message-avatar"></div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        พร้อมใช้งาน — พิมพ์ help เพื่อดูคำสั่ง หรือถามเกี่ยวกับ threat ที่กำลังเกิดขึ้นได้เลย
+                    </div>
+                    <div class="message-time" id="initialMessageTime"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- แถบด้านล่าง -->
+        <div class="chat-bottom">
+            <div class="suggestion-tags">
+                <button class="tag-btn" type="button">สรุปภาพรวม</button>
+                <button class="tag-btn" type="button">สัญญาณที่ควรตรวจสอบ</button>
+                <button class="tag-btn" type="button">top sources</button>
+            </div>
+            
+            <div class="input-container">
+                <input type="text" id="aiInput" placeholder="พิมพ์คำถามของคุณ..." maxlength="4000" autocomplete="off">
+                <button id="sendBtn" class="send-btn">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- เรียกใช้สคริปต์ภายนอก -->
+    <script src="smart_siem_chat_v2.js"></script>
+</body>
+</html>
