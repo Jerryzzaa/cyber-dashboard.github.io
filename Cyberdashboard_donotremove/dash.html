@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Attack Dashboard</title>
+    <link rel="stylesheet" href="dash.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Library สำหรับเรนเดอร์ 3D Globe -->
+    <script src="https://unpkg.com/globe.gl"></script>
+</head>
+<body>
+    
+    <div class="app-layout">
+
+        <!-- Dashboard ฝั่งซ้าย -->
+        <div class="main-dashboard">
+            
+            <header class="header">
+                <div class="logo">
+                    <span class="dot red-dot"></span> Cyber Attack Dashboard
+                </div>
+                <div class="status-indicators">
+                    <span id="latestDataDay" class="latest-data-day">Loading data…</span>
+                    <span class="time" id="live-clock">00:00:00 ICT</span>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                
+                <div class="left-panel">
+                    <div class="card">
+                        <div class="card-title">ATTACKS TODAY · LATEST DATA DAY</div>
+                        <div class="kpi-value red-text">510</div>
+                        <div class="kpi-subtext">from — source log rows</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">DENIED-ACTIVITY SIGNALS</div>
+                        <div class="kpi-value blue-text">372</div>
+                        <div class="kpi-subtext">from — denied log rows</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">HIGH-PRIORITY ACTIVE</div>
+                        <div class="kpi-value red-text">5</div>
+                        <div class="kpi-subtext">incidents meeting the UI triage threshold</div>
+                    </div>
+                    <!-- Exfiltration Channels -->
+                    <div class="card">
+                        <div class="card-title">TOP DESTINATION PORTS</div>
+                        <div class="port-legend" id="portLegengContainer"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="margin-bottom: 15px; color: #64748b;">TOP SOURCE COUNTRIES</div>
+                        <div id="topCountriesList"></div>
+                    </div>
+                </div>
+
+                <div class="center-panel">
+                    <div class="top-row">
+                        <!-- 🌟 การ์ดลูกโลก 3D -->
+                        <div class="card map-card" style="display: flex; flex-direction: column; overflow: hidden; position: relative;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-shrink: 0;">
+                                <div class="card-title" style="margin: 0;">GLOBAL THREAT GLOBE 3D</div>
+                                <button id="expandGlobeBtn" title="Expand Globe" style="background: rgba(6, 182, 212, 0.1); border: 1px solid var(--color-cyan); color: var(--color-cyan); border-radius: 4px; cursor: pointer; padding: 2px 8px; font-size: 10px;">Fullscreen</button>
+                            </div>
+                            <div id="globeContainer" style="flex: 1; width: 100%; height: 100%; overflow: hidden; position: relative; border-radius: 4px; background: #050811; display: flex; justify-content: center; align-items: center;"></div>
+                        </div>
+
+                        <!-- 🌟 การ์ด ATTACK TYPES -->
+                        <div class="card chart-card">
+                            <div class="card-title">ATTACK TYPES</div>
+                            <div class="chart-container">
+                                <canvas id="attackTypeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🌟 ROW: Confidence Score และ Volume Card -->
+                    <div class="middle-row" style="display: flex; gap: 15px; height: 18vh; min-height: 120px; flex-shrink: 0;">
+                        
+                        <!-- การ์ด Confidence Score -->
+                        <div class="card metrics-card" style="flex: 0 1 35%; display: flex; flex-direction: column; overflow: hidden; position: relative; justify-content: center;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; flex-shrink: 0;">
+                                <div class="card-title" style="margin: 0;">CONFIDENCE & METRICS</div>
+                                <button id="expandMetricsBtn" title="Expand Metrics" style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--color-green); color: var(--color-green); border-radius: 4px; cursor: pointer; padding: 2px 8px; font-size: 10px;">Fullscreen</button>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: space-between; height: 100%; padding: 5px 0;">
+                                <div style="text-align: center; flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                                    <div style="font-size: 38px; font-weight: bold; color: var(--color-green); line-height: 1; font-family: 'Rajdhani', sans-serif;">85</div>
+                                    <div class="kpi-subtext" style="color: var(--color-green); margin-top: 2px;">SCORE</div>
+                                </div>
+                                <div style="flex: 1.5; padding-left: 15px; border-left: 1px solid var(--border-color); display: grid; grid-template-columns: 1fr 1fr; gap: 4px; font-size: 10px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+                                    <div>Acc: <span style="color: #e2e8f0;">0.99</span></div>
+                                    <div>Prec: <span style="color: #e2e8f0;">0.97</span></div>
+                                    <div>Rec: <span style="color: #e2e8f0;">0.98</span></div>
+                                    <div>F1: <span style="color: #e2e8f0;">0.97</span></div>
+                                    <div>PR: <span style="color: #e2e8f0;">0.97</span></div>
+                                    <div>ROC: <span style="color: #e2e8f0;">0.97</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- การ์ด Volume -->
+                        <div class="card volume-card" style="flex: 0 1 65%; height: 100%; min-height: unset; margin: 0;">
+                            <div class="card-title">ATTACK VOLUME - LAST 24H</div>
+                            <div class="chart-container-bar">
+                                <canvas id="attackVolumeChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card table-card">
+                        <div class="table-header-filters">
+                         <span>TRIAGE RISK</span>
+
+                        <button class="filter-btn active"
+                            type="button"
+                            data-filter="all"
+                            aria-pressed="true">ALL</button>
+
+                        <button class="filter-btn"
+                            type="button"
+                            data-filter="80+"
+                            aria-pressed="false">80+</button>
+
+                        <button class="filter-btn"
+                            type="button"
+                            data-filter="60-79"
+                            aria-pressed="false">60–79</button>
+
+                        <button class="filter-btn"
+                            type="button"
+                            data-filter="&lt;60"
+                            aria-pressed="false">&lt;60</button>
+
+                        <span id="event-count" style="margin-left: auto;">
+                            0 of 0 recent model signals
+                         </span>
+                    </div>
+
+                        <div class="table-scroll">
+                            <table class="events-table">
+                                <thead>
+                                    <tr>
+                                        <th>TIME (ICT)</th>
+                                        <th>OBSERVED IP</th>
+                                        <th>COUNTRY LABEL</th>
+                                        <th>DESTINATION IP</th>
+                                        <th>DETECTOR CATEGORY</th>
+                                        <th>TRIAGE RISK</th>
+                                        <th>DEST PORT</th>
+                                        <th>OBSERVATION</th>
+                                        <th>SENSORS</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="eventsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- หน้าต่าง Chatbot -->
+        <iframe src="chatbot.html" id="chatbot-iframe"></iframe>
+
+    </div>
+
+    <!-- Modal ขยายลูกโลก 3D -->
+    <div id="globeModal" class="globe-modal">
+        <span class="close-modal" id="closeGlobeModal">&times;</span>
+        <div id="modalGlobeContainer"></div>
+    </div>
+
+    <!-- 🌟 Modal ขยายค่า Metrics & Confidence -->
+    <div id="metricsModal" class="globe-modal" style="display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100vw; height: 100vh; background-color: rgba(5, 8, 17, 0.85); backdrop-filter: blur(4px);">
+        <div style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; padding: 20px; box-sizing: border-box;">
+            
+            <div style="background-color: #0b1121; border: 1px solid #1e293b; border-radius: 8px; width: 100%; max-width: 950px; display: flex; flex-direction: column; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+                
+                <!-- ปุ่มกากบาท (X) มุมขวาบน -->
+                <div style="display: flex; justify-content: flex-end; padding: 15px 20px 0;">
+                    <span id="closeMetricsModal" style="color: #94a3b8; font-size: 24px; cursor: pointer; line-height: 1; transition: 0.2s;">&times;</span>
+                </div>
+
+                <!-- เนื้อหาใน Modal -->
+                <div style="padding: 0 30px 30px;">
+                    
+                    <!-- ส่วนหัว Title -->
+                    <div style="margin-bottom: 25px;">
+                        <h2 style="color: #06b6d4; font-size: 26px; font-weight: bold; margin: 0 0 5px 0; font-family: 'Rajdhani', sans-serif;">Model insights</h2>
+                        <div style="color: #e2e8f0; font-size: 14px; display: flex; align-items: center; gap: 10px;">
+                            ประสิทธิภาพของ detector ระดับเหตุการณ์ 
+
+                        </div>
+                    </div>
+
+                    <!-- เมนู Tabs (กดเพื่อเปลี่ยนหน้า) -->
+                    <div style="display: flex; border-bottom: 1px solid #1e293b; margin-bottom: 20px; gap: 20px;">
+                        <div id="tab-performance" style="padding: 10px 10px; border-bottom: 2px solid #06b6d4; color: #06b6d4; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s;">
+                            Detector performance
+                        </div>
+                        <div id="tab-confidence" style="padding: 10px 10px; border-bottom: 2px solid transparent; color: #64748b; font-size: 14px; cursor: pointer; display: flex; flex-direction: column; transition: 0.2s;">
+                            <span style="font-weight: 600;">Event confidence</span>
+
+                        </div>
+                    </div>
+
+                    <!-- ==============================================
+                         TAB 1: Detector Performance (ตารางเดิม)
+                         ============================================== -->
+                    <div id="content-performance" style="display: block;">
+                        <!-- ฟิลเตอร์ & ข้อมูลชุดประเมิน -->
+                        <div style="display: flex; gap: 40px; margin-bottom: 20px; color: #cbd5e1; font-size: 13px; align-items: center;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                Model version
+                                <select style="background: transparent; border: 1px solid #334155; color: #cbd5e1; padding: 4px 8px; border-radius: 4px; outline: none; cursor: pointer; font-size: 13px;">
+                                    <option value="">1 สิงหาคม 2569</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <!-- ตารางข้อมูล -->
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: center; color: #e2e8f0; font-family: 'JetBrains Mono', monospace;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid #334155; color: #94a3b8;">
+                                        <th style="padding: 12px 12px 12px 0; text-align: left; font-weight: normal; width: 180px;">Detector</th>
+                                        <th style="padding: 12px; font-weight: normal;">Accuracy</th>
+                                        <th style="padding: 12px; font-weight: normal;">Precision</th>
+                                        <th style="padding: 12px; font-weight: normal;">Recall</th>
+                                        <th style="padding: 12px; font-weight: normal;">F1</th>
+                                        <th style="padding: 12px; font-weight: normal;">PR-AUC</th>
+                                        <th style="padding: 12px; font-weight: normal;">ROC-AUC</th>
+                                        <th style="padding: 12px 0 12px 12px; font-weight: normal;">Balanced acc.</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr style="border-bottom: 1px solid #1e293b;"><td style="padding: 12px 12px 12px 0; text-align: left;">D1 · Recon</td><td>0.999</td><td>0.980</td><td>0.987</td><td>0.983</td><td>0.975</td><td>0.978</td><td style="padding-right: 0;">0.993</td></tr>
+                                    <tr style="border-bottom: 1px solid #1e293b;"><td style="padding: 12px 12px 12px 0; text-align: left;">D3 · Delivery</td><td>0.997</td><td>0.976</td><td>0.965</td><td>0.970</td><td>0.976</td><td>0.973</td><td style="padding-right: 0;">0.982</td></tr>
+                                    <tr style="border-bottom: 1px solid #1e293b;"><td style="padding: 12px 12px 12px 0; text-align: left;">D4 · Exploit</td><td>0.998</td><td>0.973</td><td>0.993</td><td>0.983</td><td>0.991</td><td>0.964</td><td style="padding-right: 0;">0.996</td></tr>
+                                    <tr style="border-bottom: 1px solid #1e293b;"><td style="padding: 12px 12px 12px 0; text-align: left;">D5 · Install</td><td>0.995</td><td>0.981</td><td>0.971</td><td>0.976</td><td>0.993</td><td>0.984</td><td style="padding-right: 0;">0.984</td></tr>
+                                    <tr style="border-bottom: 1px solid #1e293b;"><td style="padding: 12px 12px 12px 0; text-align: left;">D6 · C2</td><td>0.998</td><td>0.987</td><td>0.974</td><td>0.980</td><td>0.973</td><td>0.982</td><td style="padding-right: 0;">0.987</td></tr>
+                                    <tr style="border-bottom: 1px solid #1e293b;"><td style="padding: 12px 12px 12px 0; text-align: left;">D7a · Actions</td><td>0.996</td><td>0.975</td><td>0.988</td><td>0.981</td><td>0.964</td><td>0.968</td><td style="padding-right: 0;">0.992</td></tr>
+                                    <tr><td style="padding: 12px 12px 12px 0; text-align: left;">D7b · Actions</td><td>0.997</td><td>0.973</td><td>0.979</td><td>0.976</td><td>0.992</td><td>0.973</td><td style="padding-right: 0;">0.988</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ==============================================
+                         TAB 2: Event Confidence (กราฟแท่งใหม่)
+                         ============================================== -->
+                    <div id="content-confidence" style="display: none; padding-top: 10px;">
+                        <div style="margin-bottom: 20px; color: #cbd5e1; font-size: 14px;">
+                            ตัวอย่าง confidence_score ของเหตุการณ์โจมตีจริงและเหตุการณ์ปกติ
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; position: relative;">
+                            
+                            <!-- เส้น Grid พื้นหลัง -->
+                            <div style="position: absolute; left: 165px; right: 350px; top: -10px; bottom: 15px; display: flex; justify-content: space-between; z-index: 0; border-left: 1px solid #1e293b; border-right: 1px solid #1e293b;">
+                                <div style="border-left: 1px solid #1e293b; height: 100%; margin-left: 25%;"></div>
+                                <div style="border-left: 1px solid #1e293b; height: 100%;"></div>
+                                <div style="border-left: 1px solid #1e293b; height: 100%; margin-right: 25%;"></div>
+                            </div>
+
+                            <!-- Bar 1 -->
+                            <div style="display: flex; align-items: center; gap: 15px; position: relative; z-index: 1;">
+                                <div style="width: 150px; text-align: right; color: #94a3b8;">Fortigate:171708</div>
+                                <div style="flex: 1; background: transparent; height: 26px; position: relative;">
+                                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: #3b82f6; border-radius: 2px;"></div>
+                                </div>
+                                <div style="width: 350px; display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: bold; color: #f8fafc; font-size: 15px; min-width: 30px;">100</span>
+                                    <span style="color: #cbd5e1; font-family: 'Inter', sans-serif; font-size: 12px;">โจมตีจริง · stage 1 → ทำนาย 1 Recon (D1)</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Bar 2 -->
+                            <div style="display: flex; align-items: center; gap: 15px; position: relative; z-index: 1;">
+                                <div style="width: 150px; text-align: right; color: #94a3b8;">Palo Alto_NGF:1139114</div>
+                                <div style="flex: 1; background: transparent; height: 26px; position: relative;">
+                                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: #ec4899; border-radius: 2px;"></div>
+                                </div>
+                                <div style="width: 350px; display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: bold; color: #f8fafc; font-size: 15px; min-width: 30px;">100</span>
+                                    <span style="color: #cbd5e1; font-family: 'Inter', sans-serif; font-size: 12px;">โจมตีจริง · stage 6 → ทำนาย 6 C2 (D6)</span>
+                                </div>
+                            </div>
+
+                            <!-- Bar 3 -->
+                            <div style="display: flex; align-items: center; gap: 15px; position: relative; z-index: 1;">
+                                <div style="width: 150px; text-align: right; color: #94a3b8;">Palo Alto_EDR:1414987</div>
+                                <div style="flex: 1; background: transparent; height: 26px; position: relative;">
+                                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: #16a34a; border-radius: 2px;"></div>
+                                </div>
+                                <div style="width: 350px; display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: bold; color: #f8fafc; font-size: 15px; min-width: 30px;">100</span>
+                                    <span style="color: #cbd5e1; font-family: 'Inter', sans-serif; font-size: 12px;">โจมตีจริง · stage 7 (EDR) → ทำนาย 7 Actions (D7b)</span>
+                                </div>
+                            </div>
+
+                            <!-- Bar 4 -->
+                            <div style="display: flex; align-items: center; gap: 15px; position: relative; z-index: 1;">
+                                <div style="width: 150px; text-align: right; color: #94a3b8;">Palo Alto_EDR:1139113</div>
+                                <div style="flex: 1; background: transparent; height: 26px; position: relative;">
+                                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: #737373; border-radius: 2px;"></div>
+                                </div>
+                                <div style="width: 350px; display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: bold; color: #f8fafc; font-size: 15px; min-width: 30px;">100</span>
+                                    <span style="color: #cbd5e1; font-family: 'Inter', sans-serif; font-size: 12px;">ปกติ แต่อยู่ในหน้าต่างที่โดนโจมตี → ทำนาย 6 C2 (D6)</span>
+                                </div>
+                            </div>
+
+                            <!-- Bar 5 (Score 0) -->
+                            <div style="display: flex; align-items: center; gap: 15px; position: relative; z-index: 1;">
+                                <div style="width: 150px; text-align: right; color: #94a3b8;">Fortigate:1139113</div>
+                                <div style="flex: 1; background: transparent; height: 26px; position: relative;">
+                                    <div style="position: absolute; left: 0; top: 0; height: 100%; width: 100%; background: #475569; border-radius: 2px;"></div>
+                                </div>
+                                <div style="width: 350px; display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: bold; color: #f8fafc; font-size: 15px; min-width: 30px;">0</span>
+                                    <span style="color: #cbd5e1; font-family: 'Inter', sans-serif; font-size: 12px;">ปกติ ในหน้าต่างปกติ → ทำนาย ปกติ</span>
+                                </div>
+                            </div>
+                            
+                            <!-- ตัวเลขแกนด้านล่าง -->
+                            <div style="display: flex; align-items: center; gap: 15px; position: relative; z-index: 1; margin-top: 5px;">
+                                <div style="width: 150px;"></div>
+                                <div style="flex: 1; display: flex; justify-content: space-between; color: #64748b; font-size: 11px;">
+                                    <span>0</span>
+                                    <span>25</span>
+                                    <span>50</span>
+                                    <span>75</span>
+                                    <span>100</span>
+                                </div>
+                                <div style="width: 350px;"></div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- ส่วนท้าย Footer & ปุ่มปิด -->
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 25px;">
+                        <div style="color: #64748b; font-size: 11px; line-height: 1.6;">
+
+                        </div>
+                        <button id="closeMetricsBtnBottom" style="background: transparent; border: 1px solid #06b6d4; color: #06b6d4; padding: 6px 30px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">ปิด</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="dash2.js"></script>
+</body>
+</html>
