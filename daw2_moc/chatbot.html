@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Analyst</title>
     <link rel="stylesheet" href="chatbot.css">
+    
+    <!-- 🌟 สคริปต์สำหรับแปลงข้อความ Markdown เป็น HTML (ตาราง) -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- 🌟 เพิ่ม DOMPurify ที่นี่: จำเป็นต้องมีเพื่อให้ dash2.js ยอมสร้างตารางให้ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.6/purify.min.js"></script>
 </head>
 <body>
 
-    <!-- 🌟 เพิ่มคลาส expanded เข้าไปตรงนี้ เพื่อให้เปิดมาเต็มจอตั้งแต่เริ่ม -->
+    <!-- เพิ่มคลาส expanded เข้าไปตรงนี้ เพื่อให้เปิดมาเต็มจอตั้งแต่เริ่ม -->
     <div class="ai-sidebar expanded">
         
         <!-- Header -->
@@ -30,7 +35,7 @@
                     title="Craet PDF">
                     Creat PDF
                 </button>
-                <!-- 🌟 เพิ่มปุ่มเริ่มแชทใหม่ตรงนี้ -->
+                <!-- ปุ่มเริ่มแชทใหม่ -->
                 <button id="newChatBtn" class="header-btn" title="เริ่มแชทใหม่">
                     <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 5v14M5 12h14"/>
@@ -41,7 +46,6 @@
                         <path d="M4 14h6v6M20 10h-6V4M14 10l7-7M10 14l-7 7"/>
                     </svg>
                 </button>
-                <!-- <span class="close-icon" title="ปิดแชท">✕</span> -->
             </div>
         </div>
 

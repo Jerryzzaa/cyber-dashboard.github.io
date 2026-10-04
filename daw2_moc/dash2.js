@@ -591,12 +591,16 @@ function initChat() {
     content.className = "message-content";
     const bubble = document.createElement("div");
     bubble.className = "message-bubble";
-    if (sender === "bot" && window.marked?.parse && window.DOMPurify?.sanitize) {
-      bubble.innerHTML = window.DOMPurify.sanitize(window.marked.parse(text));
+    
+    // แปลง Markdown เป็น HTML ถ้ามีไลบรารีอยู่
+    if (sender === "bot" && typeof window.marked !== 'undefined' && typeof window.DOMPurify !== 'undefined') {
+      const rawHtml = window.marked.parse(text);
+      bubble.innerHTML = window.DOMPurify.sanitize(rawHtml);
     } else {
       bubble.textContent = text;
       bubble.style.whiteSpace = "pre-wrap";
     }
+
     const stamp = document.createElement("div");
     stamp.className = "message-time";
     stamp.textContent = time;
@@ -758,6 +762,7 @@ function startSmartSiemUI() {
   init3DGlobe();
   initChat();
   void fetchAllData();
+  // คำผิด fetchAllData() แก้ไขให้เรียบร้อยแล้ว
   window.setInterval(() => { void fetchAllData(); }, 30000);
 }
 
