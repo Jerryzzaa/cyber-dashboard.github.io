@@ -462,3 +462,18 @@ body, html {
 .message-bubble table::-webkit-scrollbar-thumb:hover {
     background: #06b6d4;
 }
+
+/*---- แก้พื้นที่chatbot -----*/
+/* เพิ่มพื้นที่ซ้าย–ขวา ให้ข้อความแชทอยู่กลางหน้าจอ */
+.ai-sidebar.expanded .chat-history {
+    padding-left: max(24px, calc(50% - 520px)); /*ปรับตรงเลข500นี้ ถ้าจะเพิ่มจะลด*/
+    padding-right: max(24px, calc(50% - 520px));
+}
+
+/* ระยะขอบสำหรับหน้าจอมือถือ */
+@media (max-width: 600px) {
+    .ai-sidebar.expanded .chat-history {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
