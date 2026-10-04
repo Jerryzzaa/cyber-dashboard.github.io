@@ -13,7 +13,7 @@ let latestOverview = null;
 let recentTableEvents = [];
 let currentRiskFilter = "all";
 
-// 🌟 ปรับสัดส่วนข้อมูล Top Source Countries ให้ผลรวมเท่ากับ 9,417 (โดยให้ Reserved อยู่บนสุดและมากที่สุด)
+// 🌟 ปรับสัดส่วนข้อมูล Top Source Countries ให้ผลรวมเท่ากับ 9,417
 const MOCK_COUNTRIES_DATA = [
   { country: "Reserved", detection_windows: 3850, country_source: "Internal" },
   { country: "China", detection_windows: 2100, country_source: "GeoIP" },
@@ -175,19 +175,15 @@ function renderTopPorts(items) {
   items.slice(0, 4).forEach((item, index) => {
     const row = document.createElement("div");
     row.className = "port-item";
-
     const swatch = document.createElement("span");
     swatch.className = "port-swatch";
     swatch.style.backgroundColor = colors[index];
-
     const label = document.createElement("span");
     label.className = "port-label";
     label.textContent = `Port ${item.port ?? "—"}`;
-
     const count = document.createElement("span");
     count.className = "port-count";
     count.textContent = `${numberText(item.count, "0")} signals`;
-
     row.append(swatch, label, count);
     container.appendChild(row);
   });
@@ -306,6 +302,68 @@ function init3DGlobe() {
     });
   }
   if (close && modal) close.addEventListener("click", () => { modal.style.display = "none"; });
+}
+
+// 🌟 ฟังก์ชันจัดการปุ่มเปิด/ปิดหน้าต่าง Metrics & การสลับ Tabs
+function initMetricsModal() {
+  const modal = document.getElementById("metricsModal");
+  const expandBtn = document.getElementById("expandMetricsBtn");
+  const closeBtnX = document.getElementById("closeMetricsModal");
+  const closeBtnBottom = document.getElementById("closeMetricsBtnBottom");
+  
+  // Tab Elements
+  const tabPerf = document.getElementById("tab-performance");
+  const tabConf = document.getElementById("tab-confidence");
+  const tabConfSubtext = document.getElementById("tab-confidence-subtext");
+  
+  // Content Elements
+  const contentPerf = document.getElementById("content-performance");
+  const contentConf = document.getElementById("content-confidence");
+  
+  // โชว์ Modal เมื่อกด Expand
+  if (expandBtn && modal) {
+      expandBtn.addEventListener("click", () => {
+          modal.style.display = "block"; 
+      });
+  }
+  
+  // ซ่อน Modal
+  const closeModalFn = () => {
+      if (modal) modal.style.display = "none";
+  };
+  if (closeBtnX) closeBtnX.addEventListener("click", closeModalFn);
+  if (closeBtnBottom) closeBtnBottom.addEventListener("click", closeModalFn);
+
+  // ระบบสลับหน้า (Tabs)
+  if (tabPerf && tabConf && contentPerf && contentConf) {
+      tabPerf.addEventListener("click", () => {
+          // สลับ Tab ให้ Performance Active
+          tabPerf.style.borderBottom = "2px solid #06b6d4";
+          tabPerf.style.color = "#06b6d4";
+          
+          tabConf.style.borderBottom = "2px solid transparent";
+          tabConf.style.color = "#64748b";
+          if (tabConfSubtext) tabConfSubtext.style.color = "#64748b"; // สีเทาปกติ
+
+          // โชว์เนื้อหา Performance, ซ่อน Confidence
+          contentPerf.style.display = "block";
+          contentConf.style.display = "none";
+      });
+
+      tabConf.addEventListener("click", () => {
+          // สลับ Tab ให้ Confidence Active
+          tabConf.style.borderBottom = "2px solid #06b6d4";
+          tabConf.style.color = "#06b6d4";
+          if (tabConfSubtext) tabConfSubtext.style.color = "#06b6d4"; // ตัวหนังสือฟ้าขึ้นเมื่อกด
+          
+          tabPerf.style.borderBottom = "2px solid transparent";
+          tabPerf.style.color = "#64748b";
+
+          // โชว์เนื้อหา Confidence, ซ่อน Performance
+          contentPerf.style.display = "none";
+          contentConf.style.display = "block";
+      });
+  }
 }
 
 function relabelEventHeaders(table) {
@@ -592,7 +650,6 @@ function initChat() {
     const bubble = document.createElement("div");
     bubble.className = "message-bubble";
     
-    // แปลง Markdown เป็น HTML ถ้ามีไลบรารีอยู่
     if (sender === "bot" && typeof window.marked !== 'undefined' && typeof window.DOMPurify !== 'undefined') {
       const rawHtml = window.marked.parse(text);
       bubble.innerHTML = window.DOMPurify.sanitize(rawHtml);
@@ -761,8 +818,8 @@ function startSmartSiemUI() {
   initRealTimeClock();
   init3DGlobe();
   initChat();
+  initMetricsModal(); // 🌟 เรียกใช้ Modal ขยายจอ & ระบบเปลี่ยน Tab
   void fetchAllData();
-  // คำผิด fetchAllData() แก้ไขให้เรียบร้อยแล้ว
   window.setInterval(() => { void fetchAllData(); }, 30000);
 }
 
