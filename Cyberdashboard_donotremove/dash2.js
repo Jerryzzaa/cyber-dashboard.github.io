@@ -370,7 +370,7 @@ function relabelEventHeaders(table) {
     const headers = table?.querySelectorAll("thead th") || [];
     const labels = [
         "TIME (ICT)", "OBSERVED IP", "COUNTRY LABEL", "DESTINATION IP",
-        "DETECTOR CATEGORY", "TRIAGE RISK", "DEST PORT", "OBSERVATION", "SENSORS"
+        "DETECTOR CATEGORY", "RISK SCORE", "DEST PORT", "OBSERVATION", "SENSORS"
     ];
     labels.forEach((label, index) => {
         if (headers[index]) {
@@ -825,3 +825,29 @@ function startSmartSiemUI() {
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", startSmartSiemUI, { once: true }); 
 else startSmartSiemUI();
+
+function renameRiskButtons() {
+    const labels = {
+        "all": "ALL",
+        "80+": "HIGH",
+        "60-79": "MEDIUM",
+        "60–79": "MEDIUM",
+        "<60": "LOW"
+    };
+
+    document
+        .querySelectorAll(".table-header-filters .filter-btn")
+        .forEach((button) => {
+            const label = labels[button.dataset.filter];
+
+            if (label) {
+                button.textContent = label;
+            }
+        });
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", renameRiskButtons);
+} else {
+    renameRiskButtons();
+}
